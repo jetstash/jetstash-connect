@@ -36,7 +36,8 @@ class JetstashConnect
     $this->setVersion();
     $this->setSettings();
     add_action('admin_menu', array(&$this,'loadAdminPanel'));
-    var_dump('Env: '.$this->environment);
+
+    var_dump($this->handleGetRequest('/user/forms'));
   }
 
   /**
@@ -85,6 +86,25 @@ class JetstashConnect
     } else {
       $this->settings = false;
     }
+  }
+
+  /**
+   * Takes post data and pushes it to the database
+   *
+   * @param array
+   *
+   * @return object
+   */
+  public static function updateSettings($post) {
+    $settings = new StdClass();
+    $settings->api_key = isset($post['api_key']) ? $post['api_key'] : false;
+    $settings->user    = isset($post['user']) ? $post['user'] : false;
+    $cerealSettings = serialize($settings);
+    update_option('jetstash_connect_settings', $cerealSettings);
+
+    $settings->error         = false;
+    $settings->error_message = false;
+    return $settings;
   }
 
   /**
@@ -165,7 +185,7 @@ class JetstashConnect
    */
   protected function retrieveForms()
   {
-
+    $endpoint = '/user/forms';
   }
 
   /**
@@ -189,9 +209,9 @@ class JetstashConnect
    *
    * @return object
    */
-  private function handleGetRequest($endpoint = null)
+  private function handleGetRequest($endpoint)
   {
-    $url = 'http://api.jetstash.dev/v1/user/forms?api_key=123&user=1';
+    $url  = $this->apiUrl.'/v1'.$endpoint.'?api_key='.$this->settings->api_key.'&user='.$this->settings->user;
     $curl = curl_init();
     curl_setopt($curl, CURLOPT_URL, $url);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1); 
