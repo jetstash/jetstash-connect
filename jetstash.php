@@ -29,13 +29,14 @@ class JetstashConnect
   function __construct()
   {
     $this->version     = '0.1.0';
-    $this->environment = setEnvironment();
     add_action('admin_init', array($this, 'checkVersion'));
     if(!$this->compatibleVersion()) return;
 
+    $this->setEnvironment();
     $this->setVersion();
     $this->setSettings();
     add_action('admin_menu', array(&$this,'loadAdminPanel'));
+    var_dump('Env: '.$this->environment);
   }
 
   /**
@@ -58,10 +59,11 @@ class JetstashConnect
    */
   protected function setEnvironment()
   {
-    if(file_exists(plugin_dir_path('env_local'))) {
+    $base = plugin_dir_path( __FILE__ );
+    if(file_exists($base.'env_local')) {
       $this->environment = 'local';
       $this->apiUrl      = 'http://api.jetstash.dev'; 
-    } elseif(file_exists(plugin_dir_path('env_staging'))) {
+    } elseif(file_exists($base.'env_staging')) {
       $this->environment = 'staging';
       $this->apiUrl      = 'http://qa.api.jetstash.com';
     } else {
