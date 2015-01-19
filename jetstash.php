@@ -15,10 +15,11 @@ class JetstashConnect
    * Define the private class vars
    *
    * @var $version string
-   * @var $wp_version string
+   * @var $environment string
+   * @var $apiUrl string
    * @var settings object||false
    */
-  private $version, $settings;
+  private $version, $environment, $apiUrl, $settings;
 
   /**
    * Construct function
@@ -27,7 +28,8 @@ class JetstashConnect
    */
   function __construct()
   {
-    $this->version = '0.1.0';
+    $this->version     = '0.1.0';
+    $this->environment = setEnvironment();
     add_action('admin_init', array($this, 'checkVersion'));
     if(!$this->compatibleVersion()) return;
 
@@ -46,6 +48,25 @@ class JetstashConnect
     $version = get_option('jetstash_connect_version');
     if($version !== $this->version) {
       update_option('jetstash_connect_version', $this->version);
+    }
+  }
+
+  /**
+   * Sets the environment of the plugin, defaults to production
+   *
+   * @return void
+   */
+  protected function setEnvironment()
+  {
+    if(file_exists(plugin_dir_path('env_local'))) {
+      $this->environment = 'local';
+      $this->apiUrl      = 'http://api.jetstash.dev'; 
+    } elseif(file_exists(plugin_dir_path('env_staging'))) {
+      $this->environment = 'staging';
+      $this->apiUrl      = 'http://qa.api.jetstash.com';
+    } else {
+      $this->environment = 'production';
+      $this->apiUrl      = 'https://api.jetstash.com';
     }
   }
 
