@@ -96,10 +96,12 @@ class JetstashConnect
    */
   public static function updateSettings($post) {
     $settings = new StdClass();
-    $settings->api_key        = isset($post['api_key']) ? $post['api_key'] : false;
-    $settings->user           = isset($post['user']) ? $post['user'] : false;
-    $settings->cache_duration = isset($post['cache_duration']) ? $post['cache_duration'] : false;
-    $cerealSettings           = serialize($settings);
+    $settings->api_key            = isset($post['api_key']) ? $post['api_key'] : false;
+    $settings->user               = isset($post['user']) ? $post['user'] : false;
+    $settings->success_message    = isset($post['success_message']) ? $post['success_message'] : false;
+    $settings->cache_duration     = isset($post['cache_duration']) ? $post['cache_duration'] : false;
+    $settings->disable_stylesheet = isset($post['disable_stylesheet']) ? $post['disable_stylesheet'] : false;
+    $cerealSettings               = serialize($settings);
     update_option('jetstash_connect_settings', $cerealSettings);
 
     $settings->error         = false;
@@ -281,7 +283,7 @@ class JetstashConnect
       $structure = $this->compileMarkup($structure->data);
     }
 
-    return '';
+    return '[FORM GOES HERE]';
   }
 
   /**

@@ -22,8 +22,11 @@ if(isset($_POST['jetstash_connect']) && $_POST['jetstash_connect'] == 'true') {
     width: auto;
     margin-top: 15px;
   }
-  select, input {
-    width: 200px;
+  select, input, textarea {
+    width: 350px;
+  }
+  textarea {
+    resize: none;
   }
 </style>
 
@@ -40,6 +43,10 @@ if(isset($_POST['jetstash_connect']) && $_POST['jetstash_connect'] == 'true') {
       <td><input id="user" type="text" name="user" value="<?php echo isset($settings->user) ? $settings->user : ''; ?>"></td>
     </tr>
     <tr>
+      <th><label for="success_message">Success Message:</label></th>
+      <td><textarea id="success_message" name="success_message" rows="8"><?php echo isset($settings->success_message) ? $settings->success_message : ''; ?></textarea></td>
+    </tr>
+    <tr>
       <th><label for="cache_duration">Cache Duration:</label></th>
       <td>
         <select id="cache_duration" name="cache_duration">
@@ -49,6 +56,12 @@ if(isset($_POST['jetstash_connect']) && $_POST['jetstash_connect'] == 'true') {
           <option value="720"<?php echo isset($settings->cache_duration) && $settings->cache_duration === '720' ? ' selected' : ''; ?>>12 Hours</option>
           <option value="1440"<?php echo isset($settings->cache_duration) && $settings->cache_duration === '1440' ? ' selected' : ''; ?>>1 Day</option>
         </select>
+      </td>
+    </tr>
+    <tr>
+      <th><label for="disable_stylesheet">Disable Stylesheet:</label></th>
+      <td><input type="checkbox" id="disable_stylesheet" name="disable_stylesheet"<?php echo isset($settings->disable_stylesheet) && $settings->disable_stylesheet ? ' checked' : ''; ?>></td>
+    </tr>
   </table>
   <input class="btn button" type="submit" name="Submit" value="Update Settings" />
 </form>
