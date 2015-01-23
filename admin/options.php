@@ -15,7 +15,6 @@ if(isset($_POST['jetstash_connect']) && $_POST['jetstash_connect'] == 'true') {
   }
 } else {
   $settings = unserialize(get_option('jetstash_connect_settings'));
-  var_dump($settings);
 } ?>
 
 <style>

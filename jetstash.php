@@ -199,9 +199,9 @@ class JetstashConnect
    */
   protected function retrieveSingleFormFields($formId)
   {
-    $endpoint = $this->urlBuilder('/form/structure', ['form_id' => $formId]);
-  
-
+    $endpoint = $this->urlBuilder('/form/structure', ['form' => $formId]);
+    $formStructure = $this->cacheFormStructure($formId, $endpoint);
+    return $formStructure;
   }
 
   /**
@@ -231,18 +231,13 @@ class JetstashConnect
   private function cacheFormStructure($formId, $endpoint) {
     $time  = time();
     $cache = get_option('jetstash_connect_'.$formId);
-    $cache = $cache !== false ? json_decode($cache) : false;
+    $cache = $cache ? json_decode($cache) : false;
 
-    if($cache !== false && ($time - $cache->time < $this->settings->cache_duration * 60)) {
-
-      // This works so just bail? I need to flip this I guess. 
-
-    } else {
+    if($cache === false || $cache->data === null || ($time - $cache->time > $this->settings->cache_duration * 60)) {
       $cache = new StdClass();
       $cache->time = $time;
       $cache->data = $this->handleGetRequest($endpoint);
-      $cache = json_encode(value)
-      update_option('jetstash_connect_'.$formId);
+      update_option('jetstash_connect_'.$formId, json_encode($cache));
     }
 
     return $cache;
@@ -258,7 +253,7 @@ class JetstashConnect
   private function handleGetRequest($endpoint)
   {
     $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, $url);
+    curl_setopt($curl, CURLOPT_URL, $endpoint);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1); 
     curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
     $data = curl_exec($curl);
@@ -281,17 +276,20 @@ class JetstashConnect
     ), $atts);
 
     if(isset($flags['form'])) {
-      $this->retrieveSingleFormFields($flags['form']);
+      $structure = $this->retrieveSingleFormFields($flags['form']);
+      var_dump($structure);
+      $structure = $this->compileMarkup($structure->data);
     }
 
-    return 'TEST SHORTCODE COMPLETE.';
+    return '';
   }
 
   /**
    *
    *
    */
-  private function compileMarkup() {
+  private function compileMarkup()
+  {
 
   }
 
