@@ -281,17 +281,80 @@ class JetstashConnect
       $structure = $this->retrieveSingleFormFields($flags['form']);
       var_dump($structure);
       $structure = $this->compileMarkup($structure->data);
-    }
 
-    return '[FORM GOES HERE]';
+      return $structure;
+    }
   }
 
   /**
+   * Compiles our markup to be pushed to the page via the shortcode
    *
+   * @param array
    *
+   * @return string
    */
-  private function compileMarkup()
+  private function compileMarkup($fields)
   {
+    $markup  = '<form id="jetstash-connect" role="form" method="post">';
+    $markup .= '<input type="hidden" name="json" value="true">';
+
+    foreach($fields as $field) {
+      if($field->type === 'text' || $field->type === 'tel' || $field->type === 'email' || $field->checkbox === 'checkbox') {
+        $markup .= $this->compileMarkupInput($field);
+      } elseif($field->type === 'textarea') {
+        $markup .= $this->compileMarkupTextarea($field);
+      } elseif($field->type === 'radio') {
+        if(isset($field->values)) {
+          $markup .= $this->compileMarkupRadio($field);
+          foreach($field->values as $radio) {
+            $markup.= $this->compileMarkupInput($field, 'radio');
+          }
+        }
+      } elseif($field->type === '') {
+
+      }
+    }
+
+    $markup .= '</form>';
+
+    return $markup;
+  }
+
+  /**
+   * Compiles the markup for all input field types
+   *
+   * @param object
+   *
+   * @return string
+   */
+  private function compileMarkupInput($field, $type = null) {
+    $markup  = '<div class="form-group">';
+    $markup .= '<label for="'.$field->field_name_adj.'">'.$field->field_name.'</label>';
+    $markup .= '<input type="'.($type ? $type : $field->type).'" class="form-control" id="'.$field->field_name_adj.'" name="'.$field->field_name_adj.'"'.($field->is_required ? ' required' : '').'>';
+    $markup .= '</div>';
+
+    return $markup;
+  }
+
+  /**
+   * Compiles the markup for all textarea field types
+   *
+   * @param object
+   *
+   * @return string
+   */
+  private function compileMarkupTextarea($field) {
+
+  }
+
+  /**
+   * Compiles the markup for all radio field types
+   *
+  private function compileMarkupRadio($field) {
+
+  }
+
+  private function compileMarkupSelect($field) {
 
   }
 
