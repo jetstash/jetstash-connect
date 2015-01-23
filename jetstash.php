@@ -36,6 +36,7 @@ class JetstashConnect
     $this->setVersion();
     $this->setSettings();
     add_action('admin_menu', array(&$this,'loadAdminPanel'));
+    add_shortcode( 'jetstash', array(&$this, 'connectShortcode') );
   }
 
   /**
@@ -95,9 +96,10 @@ class JetstashConnect
    */
   public static function updateSettings($post) {
     $settings = new StdClass();
-    $settings->api_key = isset($post['api_key']) ? $post['api_key'] : false;
-    $settings->user    = isset($post['user']) ? $post['user'] : false;
-    $cerealSettings = serialize($settings);
+    $settings->api_key        = isset($post['api_key']) ? $post['api_key'] : false;
+    $settings->user           = isset($post['user']) ? $post['user'] : false;
+    $settings->cache_duration = isset($post['cache_duration']) ? $post['cache_duration'] : false;
+    $cerealSettings           = serialize($settings);
     update_option('jetstash_connect_settings', $cerealSettings);
 
     $settings->error         = false;
@@ -197,7 +199,53 @@ class JetstashConnect
    */
   protected function retrieveSingleFormFields($formId)
   {
-    $endpoint = '/form/structure';
+    $endpoint = $this->urlBuilder('/form/structure', ['form_id' => $formId]);
+  
+
+  }
+
+  /**
+   * Builds our URLs for the GET requests
+   *
+   * @param string, array
+   *
+   * @return string
+   */
+  private function urlBuilder($endpoint, $queries)
+  {
+    $url = $this->apiUrl.'/v1'.$endpoint;
+    $url = $url.'?api_key='.$this->settings->api_key.'&user='.$this->settings->user;
+    foreach($queries as $key=>$value) {
+      $url = $url.'&'.$key.'='.$value;
+    }
+    return $url;
+  }
+
+  /**
+   * Retrieve our cached data or request a fresh set and cache that baby
+   *
+   * @param string
+   *
+   * @return object
+   */
+  private function cacheFormStructure($formId, $endpoint) {
+    $time  = time();
+    $cache = get_option('jetstash_connect_'.$formId);
+    $cache = $cache !== false ? json_decode($cache) : false;
+
+    if($cache !== false && ($time - $cache->time < $this->settings->cache_duration * 60)) {
+
+      // This works so just bail? I need to flip this I guess. 
+
+    } else {
+      $cache = new StdClass();
+      $cache->time = $time;
+      $cache->data = $this->handleGetRequest($endpoint);
+      $cache = json_encode(value)
+      update_option('jetstash_connect_'.$formId);
+    }
+
+    return $cache;
   }
 
   /**
@@ -209,7 +257,6 @@ class JetstashConnect
    */
   private function handleGetRequest($endpoint)
   {
-    $url  = $this->apiUrl.'/v1'.$endpoint.'?api_key='.$this->settings->api_key.'&user='.$this->settings->user;
     $curl = curl_init();
     curl_setopt($curl, CURLOPT_URL, $url);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1); 
@@ -227,10 +274,25 @@ class JetstashConnect
    *
    * @return string
    */
-  private function connectShortcode($atts) {
+ function connectShortcode($atts)
+ {
     $flags = shortcode_atts(array(
-      'form_id' => null,
+      'form' => null,
     ), $atts);
+
+    if(isset($flags['form'])) {
+      $this->retrieveSingleFormFields($flags['form']);
+    }
+
+    return 'TEST SHORTCODE COMPLETE.';
+  }
+
+  /**
+   *
+   *
+   */
+  private function compileMarkup() {
+
   }
 
 }

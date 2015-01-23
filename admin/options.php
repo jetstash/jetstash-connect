@@ -15,12 +15,16 @@ if(isset($_POST['jetstash_connect']) && $_POST['jetstash_connect'] == 'true') {
   }
 } else {
   $settings = unserialize(get_option('jetstash_connect_settings'));
+  var_dump($settings);
 } ?>
 
 <style>
   input.btn {
     width: auto;
     margin-top: 15px;
+  }
+  select, input {
+    width: 200px;
   }
 </style>
 
@@ -36,6 +40,16 @@ if(isset($_POST['jetstash_connect']) && $_POST['jetstash_connect'] == 'true') {
       <th><label for="user">User ID:</label></th>
       <td><input id="user" type="text" name="user" value="<?php echo isset($settings->user) ? $settings->user : ''; ?>"></td>
     </tr>
+    <tr>
+      <th><label for="cache_duration">Cache Duration:</label></th>
+      <td>
+        <select id="cache_duration" name="cache_duration">
+          <option value="30"<?php echo isset($settings->cache_duration) && $settings->cache_duration === '30' ? ' selected' : ''; ?>>30 Minutes</option>
+          <option value="60"<?php echo isset($settings->cache_duration) && $settings->cache_duration === '60' ? ' selected' : ''; ?>>1 Hour</option>
+          <option value="360"<?php echo isset($settings->cache_duration) && $settings->cache_duration === '360' ? ' selected' : ''; ?>>6 Hours</option>
+          <option value="720"<?php echo isset($settings->cache_duration) && $settings->cache_duration === '720' ? ' selected' : ''; ?>>12 Hours</option>
+          <option value="1440"<?php echo isset($settings->cache_duration) && $settings->cache_duration === '1440' ? ' selected' : ''; ?>>1 Day</option>
+        </select>
   </table>
   <input class="btn button" type="submit" name="Submit" value="Update Settings" />
 </form>
