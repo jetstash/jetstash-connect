@@ -36,8 +36,6 @@ class JetstashConnect
     $this->setVersion();
     $this->setSettings();
     add_action('admin_menu', array(&$this,'loadAdminPanel'));
-
-    var_dump($this->handleGetRequest('/user/forms'));
   }
 
   /**
@@ -165,7 +163,8 @@ class JetstashConnect
    *
    * @return void
    */
-  function loadAdminPanel() {
+  function loadAdminPanel()
+  {
     add_options_page( 'Jetstash Connect', 'Jetstash Connect', 'administrator', 'jetstash_connect', array(&$this,'loadAdminPanelTemplates'));
   }
 
@@ -174,7 +173,8 @@ class JetstashConnect
    *
    * @return void
    */
-  function loadAdminPanelTemplates() {
+  function loadAdminPanelTemplates()
+  {
     include('admin/options.php');
   }
 
@@ -197,9 +197,7 @@ class JetstashConnect
    */
   protected function retrieveSingleFormFields($formId)
   {
-
-
-
+    $endpoint = '/form/structure';
   }
 
   /**
@@ -220,6 +218,19 @@ class JetstashConnect
     curl_close($curl);
 
     return json_decode($data);
+  }
+
+  /**
+   * Parse the shortcode from the page/post/etc
+   *
+   * @param array||string
+   *
+   * @return string
+   */
+  private function connectShortcode($atts) {
+    $flags = shortcode_atts(array(
+      'form_id' => null,
+    ), $atts);
   }
 
 }
