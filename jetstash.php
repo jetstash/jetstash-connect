@@ -36,7 +36,7 @@ class JetstashConnect
     $this->setVersion();
     $this->setSettings();
     add_action('admin_menu', array(&$this,'loadAdminPanel'));
-    add_shortcode( 'jetstash', array(&$this, 'connectShortcode') );
+    add_shortcode('jetstash', array(&$this, 'connectShortcode'));
   }
 
   /**
@@ -299,24 +299,40 @@ class JetstashConnect
     $markup .= '<input type="hidden" name="json" value="true">';
 
     foreach($fields as $field) {
-      if($field->type === 'text' || $field->type === 'tel' || $field->type === 'email' || $field->checkbox === 'checkbox') {
+      if($field->type === 'text' || $field->type === 'tel' || $field->type === 'email') {
         $markup .= $this->compileMarkupInput($field);
+      } elseif($field->type === 'checkbox') {
+        $markup .= $this->compileMarkupCheckbox($field);
       } elseif($field->type === 'textarea') {
         $markup .= $this->compileMarkupTextarea($field);
       } elseif($field->type === 'radio') {
         if(isset($field->values)) {
-          $markup .= $this->compileMarkupRadio($field);
-          foreach($field->values as $radio) {
-            $markup.= $this->compileMarkupInput($field, 'radio');
-          }
+          $markup .= $this->compileMarkupLabel($field);
+          $markup .= $this->compileMarkupRadio($field, $field->values);
         }
-      } elseif($field->type === '') {
-
+      } elseif($field->type === 'select') {
+        if(isset($field->values)) {
+          $markup .= $this->compileMarkupSelect($field, $field->values);
+        }
       }
     }
 
+    $markup .= '<button type="submit" class="btn btn-default">Submit</button>';
     $markup .= '</form>';
 
+    return $markup;
+  }
+
+  /**
+   * Compile the form label
+   *
+   * @param object
+   *
+   * @return string
+   */
+  private function compileMarkupLabel($field)
+  {
+    $markup = '<label for="'.$field->field_name_adj.'">'.$field->field_name.'</label>';
     return $markup;
   }
 
@@ -327,10 +343,44 @@ class JetstashConnect
    *
    * @return string
    */
-  private function compileMarkupInput($field, $type = null) {
+  private function compileMarkupInput($field)
+  {
     $markup  = '<div class="form-group">';
-    $markup .= '<label for="'.$field->field_name_adj.'">'.$field->field_name.'</label>';
-    $markup .= '<input type="'.($type ? $type : $field->type).'" class="form-control" id="'.$field->field_name_adj.'" name="'.$field->field_name_adj.'"'.($field->is_required ? ' required' : '').'>';
+    $markup .= $this->compileMarkupLabel($field);
+    $markup .= '<input type="'.($field->type).'" class="form-control" id="'.$field->field_name_adj.'" name="'.$field->field_name_adj.'"'.(isset($field->is_required) && $field->is_required === 'on' ? ' required' : '').'>';
+    $markup .= '</div>';
+
+    return $markup;
+  }
+
+  private function compileMarkupCheckbox($field)
+  {
+    $markup  = '<div class="checkbox">';
+    $markup .= '<label for="'.$field->field_name_adj.'">';
+    $markup .= '<input type="checkbox" id="'.$field->field_name_adj.'" name="'.$field->field_name_adj.'"'.(isset($field->is_required) && $field->is_required === 'on' ? ' required' : '').'>'.$field->field_name;
+    $markup .= '</label>';
+    $markup .= '</div>';
+
+    return $markup;
+  }
+
+  /**
+   * Compiles the markup for all radio field types
+   *
+   * @param array, string
+   *
+   * @return string
+   */
+  private function compileMarkupRadio($field, $values)
+  {
+    $markup  = '<div class="form-group>';
+    foreach($values as $value) {
+      $markup .= '<div class="radio">';
+      $markup .= '<label>';
+      $markup .= '<input type="radio" name="'.$field->field_name_adj.'" value="'.$value.'"'.(isset($field->is_required) && $field->is_required === 'on' ? ' required' : '').'>'.$value;
+      $markup .= '</label>';
+      $markup .= '</div>';
+    }
     $markup .= '</div>';
 
     return $markup;
@@ -343,19 +393,35 @@ class JetstashConnect
    *
    * @return string
    */
-  private function compileMarkupTextarea($field) {
+  private function compileMarkupTextarea($field)
+  {
+    $markup  = '<div class="form-group">';
+    $markup .= $this->compileMarkupLabel($field);
+    $markup .= '<textarea id="'.$field->field_name_adj.'" name="'.$field->field_name_adj.'" class="form-control"'.(isset($field->is_required) && $field->is_required === 'on' ? ' required' : '').'></textarea>';
+    $markup .= '</div>';
 
+    return $markup;
   }
 
   /**
-   * Compiles the markup for all radio field types
+   * Compiles the markup for all select field types
    *
-  private function compileMarkupRadio($field) {
+   * @param object
+   *
+   * @return string
+   */
+  private function compileMarkupSelect($field, $values)
+  {
+    $markup  = '<div class="form-group">';
+    $markup .= $this->compileMarkupLabel($field);
+    $markup .= '<select id="'.$field->field_name_adj.'" name="'.$field->field_name_adj.'" class="form-control">';
+    foreach($values as $value) {
+      $markup .= '<option value="'.$value.'">'.$value.'</option>';
+    }
+    $markup .= '</select>';
+    $markup .= '</div>';
 
-  }
-
-  private function compileMarkupSelect($field) {
-
+    return $markup;
   }
 
 }
