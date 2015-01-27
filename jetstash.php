@@ -35,8 +35,11 @@ class JetstashConnect
     $this->setEnvironment();
     $this->setVersion();
     $this->setSettings();
-    add_action('admin_menu', array(&$this,'loadAdminPanel'));
     add_shortcode('jetstash', array(&$this, 'connectShortcode'));
+    add_action('admin_menu', array(&$this, 'loadAdminPanel'));
+    add_action('get_header', array(&$this, 'loadPublicAssets'));
+    add_action('wp_ajax_jetstash_connect', array(&$this, 'submitForm'));
+    add_action('wp_ajax_nopriv_jetstash_connect', array(&$this, 'submitForm'));
   }
 
   /**
@@ -184,6 +187,17 @@ class JetstashConnect
   }
 
   /**
+   * Load public assets
+   *
+   * @return void
+   */
+  function loadPublicAssets() {
+    if(!is_admin()) { 
+      wp_enqueue_script('jetstash-connect', plugins_url() . '/jetstash-connect/js/jetstash-ajax.js', array('jquery'), null, true);
+    }
+  }
+
+  /**
    * Retrieves a users available forms from via the Jetstash API
    *
    * @return void
@@ -236,8 +250,6 @@ class JetstashConnect
     $cache = get_option('jetstash_connect_'.$formId);
     $cache = $cache ? json_decode($cache) : false;
 
-    var_dump($cache);
-
     if($cache === false || $cache->data === null || ($time - $cache->time > $this->settings->cache_duration * 60)) {
       $cache = new StdClass();
       $cache->time = $time;
@@ -288,7 +300,7 @@ class JetstashConnect
    *
    * @return string
    */
- function connectShortcode($atts)
+ public function connectShortcode($atts)
  {
     $flags = shortcode_atts(array(
       'form' => null,
@@ -300,9 +312,41 @@ class JetstashConnect
         $this->invalidateCache($flags['form']);
       } else {
         $structure = $this->compileMarkup($structure->data);
+        $this->loadLocalizedData($flags['form']);
+
         return $structure;
       }
     }
+  }
+
+  /**
+   * Loads the CDATA to the page for consumption by the ajax script
+   *
+   * @return void
+   */
+  public function loadLocalizedData($form)
+  {
+    $parameters = array(
+      'ajaxurl' => admin_url('admin-ajax.php'),
+      'nonce'   => wp_create_nonce('submitForm'),
+      'form_id' => $form,
+      'message' => $this->settings->success_message,
+    );
+    wp_localize_script('jetstash-connect', 'jetstashConnect', $parameters);
+  }
+
+  /**
+   * Submits the form data to the mothership
+   *
+   * @return object
+   */
+  public function submitForm()
+  {
+    // TODO::
+    // - verify the nonce
+    // - cURL the environment
+    // - push the response back to the script
+    print "THIS IS DOG!";
   }
 
   /**

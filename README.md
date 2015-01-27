@@ -28,7 +28,7 @@ Bugs, pull requests, features, etc. are all handled and maintained on GitHub.
 
 ## support
 
-This plugin is a complimentary product offered to simplfy getting up and running with Jetstash + WordPress. If you need support it can be done directly through support channels on [Jetstash](https://www.jetstash.com)
+This plugin is a complimentary product offered to simplfy getting up and running with Jetstash + WordPress. If you need support it can be done directly through support channels on [Jetstash](https://www.jetstash.com).
 
 ## license
 
