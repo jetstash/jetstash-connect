@@ -62,6 +62,11 @@ if(isset($_POST['jetstash_connect']) && $_POST['jetstash_connect'] == 'true') {
       <th><label for="disable_stylesheet">Disable Stylesheet:</label></th>
       <td><input type="checkbox" id="disable_stylesheet" name="disable_stylesheet"<?php echo isset($settings->disable_stylesheet) && $settings->disable_stylesheet ? ' checked' : ''; ?>></td>
     </tr>
+    <tr>
+      <th><label for="invalidate_cache">Invalidate Cache:</label></th>
+      <td><input type="checkbox" id="invalidate_cache" name="invalidate_cache"<?php echo isset($settings->invalidate_cache) && $settings->invalidate_cache ? ' checked' : ''; ?>></td>
+    </tr>
+
   </table>
   <input class="btn button" type="submit" name="Submit" value="Update Settings" />
 </form>

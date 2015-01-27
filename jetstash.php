@@ -101,6 +101,7 @@ class JetstashConnect
     $settings->success_message    = isset($post['success_message']) ? $post['success_message'] : false;
     $settings->cache_duration     = isset($post['cache_duration']) ? $post['cache_duration'] : false;
     $settings->disable_stylesheet = isset($post['disable_stylesheet']) ? $post['disable_stylesheet'] : false;
+    $settings->invalidate_cache   = isset($post['invalidate_cache']) ? $post['invalidate_cache'] : false;
     $cerealSettings               = serialize($settings);
     update_option('jetstash_connect_settings', $cerealSettings);
 
@@ -235,6 +236,8 @@ class JetstashConnect
     $cache = get_option('jetstash_connect_'.$formId);
     $cache = $cache ? json_decode($cache) : false;
 
+    var_dump($cache);
+
     if($cache === false || $cache->data === null || ($time - $cache->time > $this->settings->cache_duration * 60)) {
       $cache = new StdClass();
       $cache->time = $time;
@@ -248,10 +251,15 @@ class JetstashConnect
   /**
    * Invalidate cache on failure
    *
+   * @param string
+   *
    * @return void
    */
-  private function invalidateCache($formId) {
-    update_option('jetstash_connect_'.$formId, 'null');
+  private function invalidateCache($formId)
+  {
+    if($settings->invalidateCache) {
+      update_option('jetstash_connect_'.$formId, 'null');
+    }
   }
 
   /**
@@ -288,11 +296,11 @@ class JetstashConnect
 
     if(isset($flags['form']) && $flags['form'] !== null) {
       $structure = $this->retrieveSingleFormFields($flags['form']);
-      if(403 !== $structure->data->status_code) {
+      if(isset($structure->data->status_code) && 403 === $structure->data->status_code) {
+        $this->invalidateCache($flags['form']);
+      } else {
         $structure = $this->compileMarkup($structure->data);
         return $structure;
-      } else {
-        $this->invalidateCache($flags['form']);
       }
     }
   }
