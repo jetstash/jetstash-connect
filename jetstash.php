@@ -246,6 +246,15 @@ class JetstashConnect
   }
 
   /**
+   * Invalidate cache on failure
+   *
+   * @return void
+   */
+  private function invalidateCache($formId) {
+    update_option('jetstash_connect_'.$formId, 'null');
+  }
+
+  /**
    * Perform the api get requests
    *
    * @param string
@@ -277,12 +286,14 @@ class JetstashConnect
       'form' => null,
     ), $atts);
 
-    if(isset($flags['form'])) {
+    if(isset($flags['form']) && $flags['form'] !== null) {
       $structure = $this->retrieveSingleFormFields($flags['form']);
-      var_dump($structure);
-      $structure = $this->compileMarkup($structure->data);
-
-      return $structure;
+      if(403 !== $structure->data->status_code) {
+        $structure = $this->compileMarkup($structure->data);
+        return $structure;
+      } else {
+        $this->invalidateCache($flags['form']);
+      }
     }
   }
 
@@ -353,6 +364,13 @@ class JetstashConnect
     return $markup;
   }
 
+  /**
+   * Compiles the markup for all checkbox field types
+   *
+   * @param object
+   *
+   * @return string
+   */
   private function compileMarkupCheckbox($field)
   {
     $markup  = '<div class="checkbox">';
@@ -367,7 +385,7 @@ class JetstashConnect
   /**
    * Compiles the markup for all radio field types
    *
-   * @param array, string
+   * @param object, array
    *
    * @return string
    */
