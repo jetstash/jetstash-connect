@@ -254,6 +254,8 @@ class JetstashConnect
       $cache = new StdClass();
       $cache->time = $time;
       $cache->data = $this->handleGetRequest($endpoint);
+      $cache->data = json_decode($cache->data->users_form->form_structure);
+
       update_option('jetstash_connect_'.$formId, json_encode($cache));
     }
 
