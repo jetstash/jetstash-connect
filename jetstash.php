@@ -296,6 +296,34 @@ class JetstashConnect
   }
 
   /**
+   * Perform the api post requests
+   *
+   * @param data
+   *
+   * @return object
+   */
+  private function handlePostRequest($endpoint, $data)
+  {
+    $data['json'] = true;
+
+    $curl = curl_init();
+
+    curl_setopt($curl, CURLOPT_URL, $endpoint);
+    curl_setopt($curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 5.1; rv:6.0.2) Gecko/20100101 Firefox/6.0.2");
+    curl_setopt($curl, CURLOPT_POST, TRUE);
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+    curl_setopt($curl, CURLOPT_HEADER, FALSE);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, FALSE);
+
+    $result = curl_exec($curl);
+    curl_close($curl);
+
+    return $result;
+  }
+
+  /**
    * Parse the shortcode from the page/post/etc
    *
    * @param array||string
@@ -329,10 +357,11 @@ class JetstashConnect
   public function loadLocalizedData($form)
   {
     $parameters = array(
-      'ajaxurl' => admin_url('admin-ajax.php'),
-      'nonce'   => wp_create_nonce('submitForm'),
-      'form_id' => $form,
-      'message' => $this->settings->success_message,
+      'ajaxurl'     => admin_url('admin-ajax.php'),
+      'nonce'       => wp_create_nonce('jetstash-connect'),
+      'form_id'     => $form,
+      'message'     => $this->settings->success_message,
+      'environment' => $this->environment,
     );
     wp_localize_script('jetstash-connect', 'jetstashConnect', $parameters);
   }
@@ -344,11 +373,43 @@ class JetstashConnect
    */
   public function submitForm()
   {
-    // TODO::
-    // - verify the nonce
-    // - cURL the environment
-    // - push the response back to the script
-    print "THIS IS DOG!";
+    $nonce = $_POST['nonce'];
+    $post  = $_POST['post'];
+    $form  = $_POST['form'];
+
+    parse_str($post, $data);
+
+    // Validate our nonce and also our hidden spam field
+    if(wp_verify_nonce($nonce, 'jetstash-connect') === false) {
+      return $this->ajaxResponse(false, 'Session expired, please refresh and try again.', $data);
+    }
+    if((!isset($data) || empty($data)) || $data["first_middle_last_name"] !== "") {
+      return $this->ajaxResponse(false, 'No post was made, please refresh and try again.', $data);
+    }
+
+    $endpoint     = $this->apiUrl.'/v1/form/submit?form='.$form;
+    $postResponse = json_decode($this->handlePostRequest($endpoint, $data));
+    $response     = $this->ajaxResponse($postResponse->success, $postResponse->message, $data);
+
+    return $response;
+  }
+
+  /**
+   * Builds our ajax response to the front end
+   *
+   * @param bool, string, array
+   *
+   * @return json
+   */
+  private function ajaxResponse($success, $message, $data = null)
+  {
+    $response = array (
+      'success' => $success,
+      'message' => $message,
+      'data'    => $data,
+    );
+
+    exit(json_encode($response));
   }
 
   /**
@@ -361,7 +422,7 @@ class JetstashConnect
   private function compileMarkup($fields)
   {
     $markup  = '<form id="jetstash-connect" role="form" method="post">';
-    $markup .= '<input type="hidden" name="json" value="true">';
+    $markup .= '<input type="text" class="hidden" name="first_middle_last_name">';
 
     foreach($fields as $field) {
       if($field->type === 'text' || $field->type === 'tel' || $field->type === 'email') {
@@ -383,6 +444,7 @@ class JetstashConnect
     }
 
     $markup .= '<button type="submit" class="btn btn-default">Submit</button>';
+    $markup .= '<p id="jetstash-error"></p>';
     $markup .= '</form>';
 
     return $markup;
