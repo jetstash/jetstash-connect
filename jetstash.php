@@ -98,7 +98,8 @@ class JetstashConnect
    *
    * @return object
    */
-  public static function updateSettings($post) {
+  public static function updateSettings($post)
+  {
     $settings = new StdClass();
     $settings->api_key            = isset($post['api_key']) ? $post['api_key'] : false;
     $settings->user               = isset($post['user']) ? $post['user'] : false;
