@@ -4,11 +4,10 @@ if(isset($_POST['jetstash_connect']) && $_POST['jetstash_connect'] == 'true') {
   if(1 === check_admin_referer('jetstash-connect')) {
 
     $settings = JetstashConnect::updateSettings($_POST);
-
     if(!$settings->error) {
-      '<div class="updated"><p><strong>Options saved.</strong></p></div>';
+      echo '<div class="updated"><p><strong>Options saved.</strong></p></div>';
     } else {
-      '<div id="message" class="error"><p>'.$settings->error_message.'</p></div>';
+      echo '<div id="message" class="error"><p>'.$settings->error_message.'</p></div>';
     }
   } else {
     die('Permission denied.');
