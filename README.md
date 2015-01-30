@@ -26,6 +26,29 @@ Bugs, pull requests, features, etc. are all handled and maintained on GitHub.
 
 [Open Issues](https://github.com/jetstash/jetstash-connect/issues)
 
+## testing && contributing
+
+The ability to run unit tests if updating the plugin has some requirements and caveats. To run the test successfully we need to shoe horn it into
+
+### requirements
+
+ - PHP 5.4+
+ - PHPUnit
+ - Clean WordPress install (with fresh database)
+
+### install && run
+
+You'll need to create an `env_local` file that contains the config information needed for the plugin to connect to the application.
+
+```
+phpunit tests/testJetstashConnect.php
+```
+
+### caveats
+
+See the [wp-cli plugin unit tests wiki](https://github.com/wp-cli/wp-cli/wiki/Plugin-Unit-Tests) for more information about how WordPress is bootstrapped into phpunit.
+
+
 ## support
 
 This plugin is a complimentary product offered to simplfy getting up and running with Jetstash + WordPress. If you need support it can be done directly through support channels on [Jetstash](https://www.jetstash.com).
