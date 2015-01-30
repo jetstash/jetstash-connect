@@ -35,6 +35,7 @@ class JetstashConnect
     $this->setEnvironment();
     $this->setVersion();
     $this->setSettings();
+
     add_shortcode('jetstash', array(&$this, 'connectShortcode'));
     add_action('admin_menu', array(&$this, 'loadAdminPanel'));
     add_action('get_header', array(&$this, 'loadPublicAssets'));
@@ -103,8 +104,8 @@ class JetstashConnect
     $settings->user               = isset($post['user']) ? $post['user'] : false;
     $settings->success_message    = isset($post['success_message']) ? $post['success_message'] : false;
     $settings->cache_duration     = isset($post['cache_duration']) ? $post['cache_duration'] : false;
-    $settings->disable_stylesheet = isset($post['disable_stylesheet']) ? $post['disable_stylesheet'] : false;
-    $settings->invalidate_cache   = isset($post['invalidate_cache']) ? $post['invalidate_cache'] : false;
+    $settings->disable_stylesheet = isset($post['disable_stylesheet']) ? true : false;
+    $settings->invalidate_cache   = isset($post['invalidate_cache']) ? true : false;
     $cerealSettings               = serialize($settings);
     update_option('jetstash_connect_settings', $cerealSettings);
 
@@ -155,8 +156,7 @@ class JetstashConnect
   /**
    * Activation check
    *
-   *
-   *
+   * @return void
    */
   static function activationCheck()
   {
@@ -191,9 +191,13 @@ class JetstashConnect
    *
    * @return void
    */
-  function loadPublicAssets() {
+  function loadPublicAssets()
+  {
     if(!is_admin()) { 
       wp_enqueue_script('jetstash-connect', plugins_url() . '/jetstash-connect/js/jetstash-ajax.js', array('jquery'), null, true);
+    }
+    if(isset($this->settings->disable_stylesheet) && true !== $this->settings->disable_stylesheet) {
+      wp_enqueue_style('jetstash-connect-css', plugins_url() . '/jetstash-connect/css/jetstash.css', false, $this->version);
     }
   }
 
