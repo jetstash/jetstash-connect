@@ -7,7 +7,7 @@ class JetstashConnectTest extends WP_UnitTestCase {
    *
    * @var class
    */
-  private $jetstash;
+  private $jetstash, $config;
 
   /**
    * Constructor function
@@ -16,6 +16,22 @@ class JetstashConnectTest extends WP_UnitTestCase {
   function __construct()
   {
     $this->jetstash = new JetstashConnect();
+    $this->setSettings();
+  }
+
+  /**
+   * Set our settings variable
+   *
+   */
+  private function setSettings() {
+    $envs = ['local', 'staging'];
+    foreach($envs as $env) {
+      if(file_exists(dirname( __FILE__ ).'/../env_'.$env)) {
+        $this->config = file_get_contents(realpath(__DIR__.'/../env_'.$env));
+        $this->config = json_decode($this->config);
+        break;
+      } 
+    }
   }
 
   /**
@@ -24,10 +40,10 @@ class JetstashConnectTest extends WP_UnitTestCase {
    */
   function testUpdateSettings() 
   {
-    $data['api_key']            = '12PE82F3a33UiGt6wzmGLCmF';
-    $data['user']               = 'x7kD9PQw';
-    $data['success_message']    = 'I am success message!';
-    $data['cache_duration']     = '30';
+    $data['api_key']            = $this->config->api_key;
+    $data['user']               = $this->config->user;
+    $data['success_message']    = $this->config->success_message;
+    $data['cache_duration']     = $this->config->cache_duration;
     $data['disable_stylesheet'] = true;
     $data['invalidate_cache']   = false;
 
@@ -38,7 +54,6 @@ class JetstashConnectTest extends WP_UnitTestCase {
     foreach($attributes as $attr) {
       $this->assertObjectHasAttribute($attr, $settings);
     }
-
   }
 
   /**
