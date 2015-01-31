@@ -48,6 +48,12 @@ phpunit tests/testJetstashConnect.php
 
 See the [wp-cli plugin unit tests wiki](https://github.com/wp-cli/wp-cli/wiki/Plugin-Unit-Tests) for more information about how WordPress is bootstrapped into phpunit.
 
+On restart the /tmp/ directory is removed forcing you to rerun these commands, you'll need to make sure the database wordpress_dev does not exist.
+
+```
+cd $(wp plugin path --dir jetstash-connect)
+bash bin/install-wp-tests.sh wordpress_dev root '' localhost latest
+```
 
 ## support
 

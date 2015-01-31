@@ -16,10 +16,16 @@ class JetstashConnect
    *
    * @var $version string
    * @var $environment string
-   * @var $apiUrl string
-   * @var settings object||false
    */
-  private $version, $environment, $apiUrl, $settings;
+  private $version, $environment;
+
+  /**
+   * Define the public class vars
+   *
+   * @var settings object||false
+   * @var $apiUrl string
+   */
+  public $settings, $apiUrl;
 
   /**
    * Construct function
