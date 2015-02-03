@@ -432,32 +432,35 @@ class JetstashConnect
    */
   private function compileMarkup($fields)
   {
-    $markup  = '<form id="jetstash-connect" role="form" method="post">';
-    $markup .= '<input type="text" class="hidden" name="first_middle_last_name">';
+    if($fields) {
+      $markup  = '<form id="jetstash-connect" role="form" method="post">';
+      $markup .= '<input type="text" class="hidden" name="first_middle_last_name">';
 
-    foreach($fields as $field) {
-      if($field->type === 'text' || $field->type === 'tel' || $field->type === 'email') {
-        $markup .= $this->compileMarkupInput($field);
-      } elseif($field->type === 'checkbox') {
-        $markup .= $this->compileMarkupCheckbox($field);
-      } elseif($field->type === 'textarea') {
-        $markup .= $this->compileMarkupTextarea($field);
-      } elseif($field->type === 'radio') {
-        if(isset($field->values)) {
-          $markup .= $this->compileMarkupLabel($field);
-          $markup .= $this->compileMarkupRadio($field, $field->values);
-        }
-      } elseif($field->type === 'select') {
-        if(isset($field->values)) {
-          $markup .= $this->compileMarkupSelect($field, $field->values);
+      foreach($fields as $field) {
+        if($field->type === 'text' || $field->type === 'tel' || $field->type === 'email') {
+          $markup .= $this->compileMarkupInput($field);
+        } elseif($field->type === 'checkbox') {
+          $markup .= $this->compileMarkupCheckbox($field);
+        } elseif($field->type === 'textarea') {
+          $markup .= $this->compileMarkupTextarea($field);
+        } elseif($field->type === 'radio') {
+          if(isset($field->values)) {
+            $markup .= $this->compileMarkupLabel($field);
+            $markup .= $this->compileMarkupRadio($field, $field->values);
+          }
+        } elseif($field->type === 'select') {
+          if(isset($field->values)) {
+            $markup .= $this->compileMarkupSelect($field, $field->values);
+          }
         }
       }
+
+      $markup .= '<button type="submit" class="btn btn-default">Submit</button>';
+      $markup .= '<p id="jetstash-error"></p>';
+      $markup .= '</form>';
+    } else {
+      $markup = '<p>Jetstash Connect Error: Check your settings, no field structure was found.';
     }
-
-    $markup .= '<button type="submit" class="btn btn-default">Submit</button>';
-    $markup .= '<p id="jetstash-error"></p>';
-    $markup .= '</form>';
-
     return $markup;
   }
 

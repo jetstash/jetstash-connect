@@ -62,6 +62,9 @@ if(isset($_POST['jetstash_connect']) && $_POST['jetstash_connect'] == 'true') {
       <td><input type="checkbox" id="disable_stylesheet" name="disable_stylesheet"<?php echo isset($settings->disable_stylesheet) && $settings->disable_stylesheet ? ' checked' : ''; ?>></td>
     </tr>
     <tr>
+      <th colspan="2">Note: If you disable the stylesheet makesure to add ".hidden { display: none; visibility: none; }" to your stylesheet.</th>
+    </tr>
+    <tr>
       <th><label for="invalidate_cache">Invalidate Cache:</label></th>
       <td><input type="checkbox" id="invalidate_cache" name="invalidate_cache"<?php echo isset($settings->invalidate_cache) && $settings->invalidate_cache ? ' checked' : ''; ?>></td>
     </tr>
