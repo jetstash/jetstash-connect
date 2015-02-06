@@ -242,7 +242,7 @@ class JetstashConnect
   private function urlBuilder($endpoint, $queries)
   {
     $url = $this->apiUrl.'/v1'.$endpoint;
-    $url = $url.'?api_key='.$this->settings->api_key.'&user='.$this->settings->user;
+    $url = $url.'?api_key='.$this->settings->api_key;
     foreach($queries as $key=>$value) {
       $url = $url.'&'.$key.'='.$value;
     }
