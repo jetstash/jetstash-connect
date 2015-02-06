@@ -227,7 +227,7 @@ class JetstashConnect
    */
   protected function retrieveSingleFormFields($formId)
   {
-    $endpoint = $this->urlBuilder('/form/structure', ['form' => $formId]);
+    $endpoint = $this->urlBuilder('/form/structure', array('form' => $formId));
     $formStructure = $this->cacheFormStructure($formId, $endpoint);
     return $formStructure;
   }
