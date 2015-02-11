@@ -1,6 +1,6 @@
 # jetstash connect
 
-![travis-ci][https://api.travis-ci.org/jetstash/jetstash-connect.svg]  
+![travis-ci](https://api.travis-ci.org/jetstash/jetstash-connect.svg)  
 
 ## installation
 

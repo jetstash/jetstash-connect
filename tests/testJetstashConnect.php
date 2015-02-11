@@ -34,15 +34,13 @@ class JetstashConnectTest extends WP_UnitTestCase {
         break;
       } 
     }
-    var_dump($_ENV);
-    var_dump($_SERVER);
-    if(isset($_ENV['environment']) && 'travis' === $_ENV['environment']) {
-      $this->config->api_url         = isset($_ENV['api_url']) ? $_ENV['api_url'] : null;
-      $this->config->api_key         = isset($_ENV['api_key']) ? $_ENV['api_key'] : null;
-      $this->config->form_id         = isset($_ENV['form_id']) ? $_ENV['form_id'] : null;
-      $this->config->user            = isset($_ENV['user']) ? $_ENV['user'] : null;
-      $this->config->success_message = isset($_ENV['success_message']) ? $_ENV['success_message'] : null;
-      $this->config->cache_duration  = isset($_ENV['cache_duration']) ? $_ENV['cache_duration'] : null;
+    if(isset($_SERVER['environment']) && 'travis' === $_SERVER['environment']) {
+      $this->config->api_url         = isset($_SERVER['api_url']) ? $_SERVER['api_url'] : null;
+      $this->config->api_key         = isset($_SERVER['api_key']) ? $_SERVER['api_key'] : null;
+      $this->config->form_id         = isset($_SERVER['form_id']) ? $_SERVER['form_id'] : null;
+      $this->config->user            = isset($_SERVER['user']) ? $_SERVER['user'] : null;
+      $this->config->success_message = isset($_SERVER['success_message']) ? $_SERVER['success_message'] : null;
+      $this->config->cache_duration  = isset($_SERVER['cache_duration']) ? $_SERVER['cache_duration'] : null;
     }
   }
 
