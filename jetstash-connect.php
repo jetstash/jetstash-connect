@@ -128,7 +128,7 @@ class JetstashConnect
    */
   static function compatibleVersion()
   {
-    if(version_compare($GLOBALS['wp_version'], '3.9', '<')) {
+    if(version_compare($GLOBALS['wp_version'], '3.8', '<')) {
       return false;
     }
     return true;
