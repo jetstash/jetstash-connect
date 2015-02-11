@@ -52,6 +52,7 @@ On restart the /tmp/ directory is removed forcing you to rerun these commands, y
 
 ```
 cd $(wp plugin path --dir jetstash-connect)
+echo 'drop database wordpress_dev;' | mysql -uroot
 bash bin/install-wp-tests.sh wordpress_dev root '' localhost latest
 ```
 
