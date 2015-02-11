@@ -26,7 +26,7 @@ class JetstashConnectTest extends WP_UnitTestCase {
    *
    */
   private function getConfig() {
-    $envs = ['local', 'staging'];
+    $envs = array('local', 'staging');
     foreach($envs as $env) {
       if(file_exists(dirname( __FILE__ ).'/../env_'.$env)) {
         $this->config = file_get_contents(realpath(__DIR__.'/../env_'.$env));
@@ -34,6 +34,8 @@ class JetstashConnectTest extends WP_UnitTestCase {
         break;
       } 
     }
+    var_dump($_ENV);
+    var_dump($_SERVER);
     if(isset($_ENV['environment']) && 'travis' === $_ENV['environment']) {
       $this->config->api_url         = isset($_ENV['api_url']) ? $_ENV['api_url'] : null;
       $this->config->api_key         = isset($_ENV['api_key']) ? $_ENV['api_key'] : null;
@@ -66,7 +68,7 @@ class JetstashConnectTest extends WP_UnitTestCase {
     $settings = JetstashConnect::updateSettings($this->settings);
 
     // Assert our object has the expected attributes
-    $attributes = ['api_key', 'user', 'success_message', 'cache_duration', 'disable_stylesheet', 'invalidate_cache', 'error', 'error_message'];
+    $attributes = array('api_key', 'user', 'success_message', 'cache_duration', 'disable_stylesheet', 'invalidate_cache', 'error', 'error_message');
     foreach($attributes as $attr) {
       $this->assertObjectHasAttribute($attr, $settings);
     }

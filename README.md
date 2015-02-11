@@ -1,5 +1,7 @@
 # jetstash connect
 
+![travis-ci][https://api.travis-ci.org/jetstash/jetstash-connect.svg]  
+
 ## installation
 
 Install as a WordPress plugin by [downloading](https://github.com/jetstash/jetstash-connect/archive/master.zip) or cloning the project as a submodule.
