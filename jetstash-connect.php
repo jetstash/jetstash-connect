@@ -49,6 +49,54 @@ class JetstashConnect
     add_action('wp_ajax_nopriv_jetstash_connect', array(&$this, 'submitForm'));
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Setup Plugin
+  |--------------------------------------------------------------------------
+  */
+
+  /**
+   * Check the WordPress version against what the plugin supports
+   *
+   * @return void
+   */
+  function checkVersion()
+  {
+    if(!self::compatibleVersion()) {
+      if(is_plugin_active(plugin_basename(__FILE__))) {
+        deactivate_plugins(plugin_basename( __FILE__ ));
+        add_action('admin_notices', array($this, 'pluginDisabled'));
+        if(isset($_GET['activate'])) unset($_GET['activate']);
+      }
+    }
+  }
+
+  /**
+   * Check to make sure current state of environment meets plugin needs
+   *
+   * @return bool
+   */
+  static function compatibleVersion()
+  {
+    if(version_compare($GLOBALS['wp_version'], '3.8', '<')) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Activation check
+   *
+   * @return void
+   */
+  static function activationCheck()
+  {
+    if(!self::compatibleVersion()) {
+      deactivate_plugins(plugin_basename(__FILE__));
+      wp_die(__('Jetstash Connect requires one of the latest 3 versions of WordPress.', 'JetstashConnect'));
+    }
+  }
+
   /**
    * Sets our version number in the wp_options table
    *
@@ -98,57 +146,26 @@ class JetstashConnect
   }
 
   /**
-   * Takes post data and pushes it to the database
+   * Parse the shortcode from the page/post/etc
    *
-   * @param array
+   * @param array||string
    *
-   * @return object
+   * @return string
    */
-  public static function updateSettings($post)
+  public function connectShortcode($atts)
   {
-    $settings = new StdClass();
-    $settings->api_key            = isset($post['api_key']) ? $post['api_key'] : false;
-    $settings->user               = isset($post['user']) ? $post['user'] : false;
-    $settings->success_message    = isset($post['success_message']) ? $post['success_message'] : false;
-    $settings->cache_duration     = isset($post['cache_duration']) ? $post['cache_duration'] : false;
-    $settings->disable_stylesheet = isset($post['disable_stylesheet']) ? true : false;
-    $settings->invalidate_cache   = isset($post['invalidate_cache']) ? true : false;
-    $cerealSettings               = serialize($settings);
-    update_option('jetstash_connect_settings', $cerealSettings);
+    $flags = shortcode_atts(array(
+      'form' => null,
+    ), $atts);
 
-    $settings->error         = false;
-    $settings->error_message = false;
-    return $settings;
+    return $this->buildStructure($flags);
   }
 
-  /**
-   * Check to make sure current state of environment meets plugin needs
-   *
-   * @return bool
-   */
-  static function compatibleVersion()
-  {
-    if(version_compare($GLOBALS['wp_version'], '3.8', '<')) {
-      return false;
-    }
-    return true;
-  }
-
-  /**
-   * Check the WordPress version against what the plugin supports
-   *
-   * @return void
-   */
-  function checkVersion()
-  {
-    if(!self::compatibleVersion()) {
-      if(is_plugin_active(plugin_basename(__FILE__))) {
-        deactivate_plugins(plugin_basename( __FILE__ ));
-        add_action('admin_notices', array($this, 'pluginDisabled'));
-        if(isset($_GET['activate'])) unset($_GET['activate']);
-      }
-    }
-  }
+  /*
+  |--------------------------------------------------------------------------
+  | Setup Admin
+  |--------------------------------------------------------------------------
+  */
 
   /**
    * Disabled plugin messaging
@@ -158,19 +175,6 @@ class JetstashConnect
   function pluginDisabled()
   {
     echo '<strong>'.esc_html__('Jetstash Connect requires one of the latest 3 versions of WordPress.', 'JetstashConnect').'</strong>';
-  }
-
-  /**
-   * Activation check
-   *
-   * @return void
-   */
-  static function activationCheck()
-  {
-    if(!self::compatibleVersion()) {
-      deactivate_plugins(plugin_basename(__FILE__));
-      wp_die(__('Jetstash Connect requires one of the latest 3 versions of WordPress.', 'JetstashConnect'));
-    }
   }
 
   /**
@@ -208,157 +212,41 @@ class JetstashConnect
     }
   }
 
-  /**
-   * Retrieves a users available forms from via the Jetstash API
-   *
-   * @return void
-   */
-  protected function retrieveForms()
-  {
-    $endpoint = '/user/forms';
-  }
+  /*
+  |--------------------------------------------------------------------------
+  | Admin Interactions
+  |--------------------------------------------------------------------------
+  */
 
   /**
-   * Retrieves the field sets for a single form field
+   * Takes post data and pushes it to the database
    *
-   * @param string
-   *
-   * @return 
-   */
-  protected function retrieveSingleFormFields($formId)
-  {
-    $endpoint = $this->urlBuilder('/form/structure', array('form' => $formId));
-    $formStructure = $this->cacheFormStructure($formId, $endpoint);
-    return $formStructure;
-  }
-
-  /**
-   * Builds our URLs for the GET requests
-   *
-   * @param string, array
-   *
-   * @return string
-   */
-  private function urlBuilder($endpoint, $queries)
-  {
-    $url = $this->apiUrl.'/v1'.$endpoint;
-    $url = $url.'?api_key='.$this->settings->api_key;
-    foreach($queries as $key=>$value) {
-      $url = $url.'&'.$key.'='.$value;
-    }
-    return $url;
-  }
-
-  /**
-   * Retrieve our cached data or request a fresh set and cache that baby
-   *
-   * @param string
+   * @param array
    *
    * @return object
    */
-  private function cacheFormStructure($formId, $endpoint) {
-    $time  = time();
-    $cache = get_option('jetstash_connect_'.$formId);
-    $cache = $cache ? json_decode($cache) : false;
-
-    if($cache === false || $cache->data === null || ($time - $cache->time > $this->settings->cache_duration * 60)) {
-      $cache = new StdClass();
-      $cache->time = $time;
-      $cache->data = $this->handleGetRequest($endpoint);
-      $cache->data = json_decode($cache->data->users_form->form_structure);
-
-      update_option('jetstash_connect_'.$formId, json_encode($cache));
-    }
-
-    return $cache;
-  }
-
-  /**
-   * Invalidate cache on failure
-   *
-   * @param string
-   *
-   * @return void
-   */
-  private function invalidateCache($formId)
+  public static function updateSettings($post)
   {
-    if($settings->invalidateCache) {
-      update_option('jetstash_connect_'.$formId, 'null');
-    }
+    $settings = new StdClass();
+    $settings->api_key            = isset($post['api_key']) ? $post['api_key'] : false;
+    $settings->user               = isset($post['user']) ? $post['user'] : false;
+    $settings->success_message    = isset($post['success_message']) ? $post['success_message'] : false;
+    $settings->cache_duration     = isset($post['cache_duration']) ? $post['cache_duration'] : false;
+    $settings->disable_stylesheet = isset($post['disable_stylesheet']) ? true : false;
+    $settings->invalidate_cache   = isset($post['invalidate_cache']) ? true : false;
+    $cerealSettings               = serialize($settings);
+    update_option('jetstash_connect_settings', $cerealSettings);
+
+    $settings->error         = false;
+    $settings->error_message = false;
+    return $settings;
   }
 
-  /**
-   * Perform the api get requests
-   *
-   * @param string
-   *
-   * @return object
-   */
-  private function handleGetRequest($endpoint)
-  {
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, $endpoint);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1); 
-    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
-    $data = curl_exec($curl);
-    curl_close($curl);
-
-    return json_decode($data);
-  }
-
-  /**
-   * Perform the api post requests
-   *
-   * @param data
-   *
-   * @return object
-   */
-  private function handlePostRequest($endpoint, $data)
-  {
-    $data['json'] = true;
-
-    $curl = curl_init();
-
-    curl_setopt($curl, CURLOPT_URL, $endpoint);
-    curl_setopt($curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 5.1; rv:6.0.2) Gecko/20100101 Firefox/6.0.2");
-    curl_setopt($curl, CURLOPT_POST, TRUE);
-    curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
-    curl_setopt($curl, CURLOPT_HEADER, FALSE);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
-    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, FALSE);
-
-    $result = curl_exec($curl);
-    curl_close($curl);
-
-    return $result;
-  }
-
-  /**
-   * Parse the shortcode from the page/post/etc
-   *
-   * @param array||string
-   *
-   * @return string
-   */
- public function connectShortcode($atts)
- {
-    $flags = shortcode_atts(array(
-      'form' => null,
-    ), $atts);
-
-    if(isset($flags['form']) && $flags['form'] !== null) {
-      $structure = $this->retrieveSingleFormFields($flags['form']);
-      if(isset($structure->data->status_code) && 403 === $structure->data->status_code) {
-        $this->invalidateCache($flags['form']);
-      } else {
-        $structure = $this->compileMarkup($structure->data);
-        $this->loadLocalizedData($flags['form']);
-
-        return $structure;
-      }
-    }
-  }
+  /*
+  |--------------------------------------------------------------------------
+  | User Interactions
+  |--------------------------------------------------------------------------
+  */
 
   /**
    * Loads the CDATA to the page for consumption by the ajax script
@@ -406,6 +294,35 @@ class JetstashConnect
   }
 
   /**
+   * Perform the api post requests
+   *
+   * @param data
+   *
+   * @return object
+   */
+  private function handlePostRequest($endpoint, $data)
+  {
+    $data['json'] = true;
+
+    $curl = curl_init();
+
+    curl_setopt($curl, CURLOPT_URL, $endpoint);
+    curl_setopt($curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 5.1; rv:6.0.2) Gecko/20100101 Firefox/6.0.2");
+    curl_setopt($curl, CURLOPT_POST, TRUE);
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+    curl_setopt($curl, CURLOPT_HEADER, FALSE);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, FALSE);
+
+    $result = curl_exec($curl);
+    curl_close($curl);
+
+    return $result;
+  }
+
+
+  /**
    * Builds our ajax response to the front end
    *
    * @param bool, string, array
@@ -422,6 +339,125 @@ class JetstashConnect
 
     exit(json_encode($response));
   }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Form Setup
+  |--------------------------------------------------------------------------
+  */
+
+  /**
+   * Builds our URLs for the GET requests
+   *
+   * @param string, array
+   *
+   * @return string
+   */
+  private function urlBuilder($endpoint, $queries)
+  {
+    $url = $this->apiUrl.'/v1'.$endpoint;
+    $url = $url.'?api_key='.$this->settings->api_key;
+    foreach($queries as $key=>$value) {
+      $url = $url.'&'.$key.'='.$value;
+    }
+    return $url;
+  }
+
+  /**
+   * Perform the api get requests
+   *
+   * @param string
+   *
+   * @return object
+   */
+  private function handleGetRequest($endpoint)
+  {
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL, $endpoint);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1); 
+    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
+    $data = curl_exec($curl);
+    curl_close($curl);
+
+    return json_decode($data);
+  }
+
+  /**
+   * Build the structure 
+   *
+   */
+  public function buildStructure($flags)
+  {
+    if(isset($flags['form']) && $flags['form'] !== null) {
+      $structure = $this->retrieveSingleFormFields($flags['form']);
+      if(isset($structure->data->status_code) && 403 === $structure->data->status_code) {
+        $this->invalidateCache($flags['form']);
+      } else {
+        $structure = $this->compileMarkup($structure->data);
+        $this->loadLocalizedData($flags['form']);
+
+        return $structure;
+      }
+    }
+  }
+
+  /**
+   * Retrieves the field sets for a single form field
+   *
+   * @param string
+   *
+   * @return 
+   */
+  protected function retrieveSingleFormFields($formId)
+  {
+    $endpoint = $this->urlBuilder('/form/structure', array('form' => $formId));
+    $formStructure = $this->cacheFormStructure($formId, $endpoint);
+    return $formStructure;
+  }
+
+  /**
+   * Retrieve our cached data or request a fresh set and cache that baby
+   *
+   * @param string
+   *
+   * @return object
+   */
+  private function cacheFormStructure($formId, $endpoint) {
+    $time  = time();
+    $cache = get_option('jetstash_connect_'.$formId);
+    $cache = $cache ? json_decode($cache) : false;
+
+    if($cache === false || $cache->data === null || ($time - $cache->time > $this->settings->cache_duration * 60)) {
+      $cache = new StdClass();
+      $cache->time = $time;
+      $cache->data = $this->handleGetRequest($endpoint);
+      $cache->data = json_decode($cache->data->users_form->form_structure);
+
+      update_option('jetstash_connect_'.$formId, json_encode($cache));
+    }
+
+    return $cache;
+  }
+
+  /**
+   * Invalidate cache on failure
+   *
+   * @param string
+   *
+   * @return void
+   */
+  private function invalidateCache($formId)
+  {
+    if($settings->invalidateCache) {
+      update_option('jetstash_connect_'.$formId, 'null');
+    }
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Markup
+  |--------------------------------------------------------------------------
+  */
 
   /**
    * Compiles our markup to be pushed to the page via the shortcode
@@ -573,6 +609,6 @@ class JetstashConnect
   }
 
 }
-new JetstashConnect();
 
+new JetstashConnect();
 register_activation_hook(__FILE__, array('JetstashConnect', 'activationCheck'));

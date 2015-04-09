@@ -28,14 +28,14 @@ Bugs, pull requests, features, etc. are all handled and maintained on GitHub.
 
 [Open Issues](https://github.com/jetstash/jetstash-connect/issues)
 
-## testing && contributing
+## testing
 
 The ability to run unit tests if updating the plugin has some requirements and caveats. To run the test successfully we need to shoe horn it into
 
 ### requirements
 
  - PHP 5.4+  
- - WordPress 3.8+  
+ - WordPress 4.0+  
  - PHPUnit  
  - Clean WordPress install (with fresh database)  
  - WP-CLI  
@@ -51,12 +51,6 @@ You'll need to create an `env_local` file that contains the config information n
 ### caveats
 
 See the [wp-cli plugin unit tests wiki](https://github.com/wp-cli/wp-cli/wiki/Plugin-Unit-Tests) for more information about how WordPress is bootstrapped into phpunit.
-
-```
-cd $(wp plugin path --dir jetstash-connect)
-echo 'drop database wordpress_dev;' | mysql -uroot
-bash bin/install-wp-tests.sh wordpress_dev root '' localhost latest
-```
 
 ## support
 
