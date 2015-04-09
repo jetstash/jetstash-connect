@@ -268,21 +268,23 @@ class JetstashConnect
   /**
    * Submits the form data to the mothership
    *
+   * @param null|array (only pass an array for TESTING purposes)
+   *
    * @return object
    */
-  public function submitForm()
+  public function submitForm($test = null)
   {
-    $nonce = $_POST['nonce'];
-    $post  = $_POST['post'];
-    $form  = $_POST['form'];
+    $nonce = !is_array($test) && isset($_POST['nonce']) ? $_POST['nonce'] : $test['nonce'];
+    $post  = !is_array($test) && isset($_POST['post']) ? $_POST['post'] : $test['post'];
+    $form  = !is_array($test) && isset($_POST['form']) ? $_POST['form'] : $test['form'];
 
     parse_str($post, $data);
 
     // Validate our nonce and also our hidden spam field
-    if(wp_verify_nonce($nonce, 'jetstash-connect') === false) {
+    if(wp_verify_nonce($nonce, 'jetstash-connect') === false && !is_array($test)) {
       return $this->ajaxResponse(false, 'Session expired, please refresh and try again.', $data);
     }
-    if((!isset($data) || empty($data)) || $data["first_middle_last_name"] !== "") {
+    if((!isset($data) || empty($data)) || (isset($data['first_middle_last_name']) && $data['first_middle_last_name'] !== "")) {
       return $this->ajaxResponse(false, 'No post was made, please refresh and try again.', $data);
     }
 
@@ -302,8 +304,6 @@ class JetstashConnect
    */
   private function handlePostRequest($endpoint, $data)
   {
-    $data['json'] = true;
-
     $curl = curl_init();
 
     curl_setopt($curl, CURLOPT_URL, $endpoint);
@@ -337,7 +337,7 @@ class JetstashConnect
       'data'    => $data,
     );
 
-    exit(json_encode($response));
+    return json_encode($response);
   }
 
   /*
@@ -345,6 +345,25 @@ class JetstashConnect
   | Form Setup
   |--------------------------------------------------------------------------
   */
+
+  /**
+   * Build the structure 
+   *
+   */
+  public function buildStructure($flags)
+  {
+    if(isset($flags['form']) && $flags['form'] !== null) {
+      $structure = $this->retrieveSingleFormFields($flags['form']);
+      if(isset($structure->data->status_code) && 403 === $structure->data->status_code) {
+        $this->invalidateCache($flags['form']);
+      } else {
+        $structure = $this->compileMarkup($structure->data);
+        $this->loadLocalizedData($flags['form']);
+
+        return $structure;
+      }
+    }
+  }
 
   /**
    * Builds our URLs for the GET requests
@@ -380,25 +399,6 @@ class JetstashConnect
     curl_close($curl);
 
     return json_decode($data);
-  }
-
-  /**
-   * Build the structure 
-   *
-   */
-  public function buildStructure($flags)
-  {
-    if(isset($flags['form']) && $flags['form'] !== null) {
-      $structure = $this->retrieveSingleFormFields($flags['form']);
-      if(isset($structure->data->status_code) && 403 === $structure->data->status_code) {
-        $this->invalidateCache($flags['form']);
-      } else {
-        $structure = $this->compileMarkup($structure->data);
-        $this->loadLocalizedData($flags['form']);
-
-        return $structure;
-      }
-    }
   }
 
   /**

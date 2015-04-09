@@ -67,6 +67,7 @@ class JetstashConnectTest extends WP_UnitTestCase {
 
     // Assert our object has the expected attributes
     $attributes = array('api_key', 'user', 'success_message', 'cache_duration', 'disable_stylesheet', 'invalidate_cache', 'error', 'error_message');
+    $this->assertInternalType('object', $settings);
     foreach($attributes as $attr) {
       $this->assertObjectHasAttribute($attr, $settings);
     }
@@ -83,16 +84,37 @@ class JetstashConnectTest extends WP_UnitTestCase {
   }
 
   /**
-   * Test the shortcode (main gateway into the plugin)
+   *
    *
    */
-  // function testConnectShortcode()
-  // {
-  //   $this->jetstash->settings = $this->settings;
-  //   $this->jetstash->apiUrl   = $this->apiUrl;
-  //   $atts['form'] = $this->config->form_id;
-  //   $structure = $this->jetstash->connectShortcode($atts);
-  // }
+  function testBuildStructure()
+  {
+    $form = array('form' => $this->config->form_id);
+    $this->jetstash->settings = (object) $this->settings;
+    $response = $this->jetstash->buildStructure($form);
+
+    $this->assertInternalType('string', $response);
+  }
+
+  /**
+   * Test the form submission
+   *
+   */
+  function testSubmitForm()
+  {
+    $data = array(
+      'nonce' => 'fake_nonce',
+      'post'  => 'first_middle_last_name=&first_name=first&last_name=last&email=test@example.com',
+      'form'  => $this->config->form_id,
+    );
+    $response   = json_decode($this->jetstash->submitForm($data));
+    $attributes = array('success', 'message', 'data');
+    $this->assertInternalType('object', $response);
+    foreach($attributes as $attr) {
+      $this->assertObjectHasAttribute($attr, $response);
+    }
+    $this->assertTrue($response->success);
+  }
 
 }
 
