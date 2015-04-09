@@ -25,7 +25,7 @@ class JetstashConnect
    * @var settings object||false
    * @var $apiUrl string
    */
-  public $settings, $apiUrl;
+  public $settings, $apiUrl, $test = false;
 
   /**
    * Construct function
@@ -274,14 +274,20 @@ class JetstashConnect
    */
   public function submitForm($test = null)
   {
-    $nonce = !is_array($test) && isset($_POST['nonce']) ? $_POST['nonce'] : $test['nonce'];
-    $post  = !is_array($test) && isset($_POST['post']) ? $_POST['post'] : $test['post'];
-    $form  = !is_array($test) && isset($_POST['form']) ? $_POST['form'] : $test['form'];
+    if($this->test && is_array($test)) {
+      $nonce = $test['nonce'];
+      $post  = $test['post'];
+      $form  = $test['form'];
+    } else {
+      $nonce = isset($_POST['nonce']) ? $_POST['nonce'] : null;
+      $post  = isset($_POST['post']) ? $_POST['post'] : null;
+      $form  = isset($_POST['form']) ? $_POST['form'] : null;
+    }
 
     parse_str($post, $data);
 
     // Validate our nonce and also our hidden spam field
-    if(wp_verify_nonce($nonce, 'jetstash-connect') === false && !is_array($test)) {
+    if(wp_verify_nonce($nonce, 'jetstash-connect') === false && !$this->test) {
       return $this->ajaxResponse(false, 'Session expired, please refresh and try again.', $data);
     }
     if((!isset($data) || empty($data)) || (isset($data['first_middle_last_name']) && $data['first_middle_last_name'] !== "")) {
@@ -337,7 +343,11 @@ class JetstashConnect
       'data'    => $data,
     );
 
-    return json_encode($response);
+    if($this->test) {
+      return json_encode($response);
+    } else {
+      exit(json_encode($response));
+    }
   }
 
   /*

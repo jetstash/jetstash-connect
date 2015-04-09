@@ -16,6 +16,7 @@ class JetstashConnectTest extends WP_UnitTestCase {
   function __construct()
   {
     $this->jetstash = new JetstashConnect();
+    $this->jetstash->test = true;
     $this->getConfig();
     $this->setSettings();
     $this->setApiUrl();
