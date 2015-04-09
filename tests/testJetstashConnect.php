@@ -52,6 +52,8 @@ class JetstashConnectTest extends WP_UnitTestCase {
     $this->settings['cache_duration']     = $this->config->cache_duration;
     $this->settings['disable_stylesheet'] = true;
     $this->settings['invalidate_cache']   = false;
+
+    $this->jetstash->settings = (object) $this->settings;
   }
 
   private function setApiUrl() {
