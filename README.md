@@ -4,7 +4,7 @@
 
 ## installation
 
-Install as a WordPress plugin by [downloading](https://github.com/jetstash/jetstash-connect/archive/master.zip) or cloning the project as a submodule.
+Install as a WordPress plugin by [downloading](https://github.com/jetstash/jetstash-connect/archive/master.zip) or cloning the project as a submodule. If it is installed as an uploaded zip it currently needs to be renamed to jetstash-connect.php. See issue [#13](https://github.com/jetstash/jetstash-connect/issues/13).
 
 ## usage
 
@@ -34,23 +34,23 @@ The ability to run unit tests if updating the plugin has some requirements and c
 
 ### requirements
 
- - PHP 5.4+
- - PHPUnit
- - Clean WordPress install (with fresh database)
+ - PHP 5.4+  
+ - WordPress 3.8+  
+ - PHPUnit  
+ - Clean WordPress install (with fresh database)  
+ - WP-CLI  
 
-### install && run
+### running tests
 
-You'll need to create an `env_local` file that contains the config information needed for the plugin to connect to the application.
+You'll need to create an `env_local` file that contains the config information needed for the plugin to connect to the application. See the `env_sample` file for the structure. To run the tests:
 
 ```
-phpunit tests/testJetstashConnect.php
+./test.sh
 ```
 
 ### caveats
 
 See the [wp-cli plugin unit tests wiki](https://github.com/wp-cli/wp-cli/wiki/Plugin-Unit-Tests) for more information about how WordPress is bootstrapped into phpunit.
-
-On restart the /tmp/ directory is removed forcing you to rerun these commands, you'll need to make sure the database wordpress_dev does not exist.
 
 ```
 cd $(wp plugin path --dir jetstash-connect)
