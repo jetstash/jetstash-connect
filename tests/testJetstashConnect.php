@@ -20,6 +20,9 @@ class JetstashConnectTest extends WP_UnitTestCase {
     $this->jetstash->test = true;
     $this->jetstash->settings = $this->settings;
 
+    var_dump($this->settings);
+    die();
+
     $this->setApiUrl();
   }
 
