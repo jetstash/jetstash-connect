@@ -409,6 +409,9 @@ class JetstashConnect
     $data = curl_exec($curl);
     curl_close($curl);
 
+    var_dump($endpoint);
+    var_dump($data);
+    die();
     return json_decode($data);
   }
 
