@@ -7,7 +7,7 @@ class JetstashConnectTest extends WP_UnitTestCase {
    *
    * @var class
    */
-  private $jetstash, $settings, $api_url;
+  private $jetstash, $settings;
 
   /**
    * Constructor function
@@ -16,14 +16,10 @@ class JetstashConnectTest extends WP_UnitTestCase {
   function __construct()
   {
     $this->setSettings();
-    $this->jetstash = new JetstashConnect();
-    $this->jetstash->test = true;
+    $this->jetstash           = new JetstashConnect();
+    $this->jetstash->test     = true;
     $this->jetstash->settings = $this->settings;
-
-    var_dump($this->settings);
-    die();
-
-    $this->setApiUrl();
+    $this->jetstash->apiUrl   = $this->settings->api_url;
   }
 
   /**
@@ -37,8 +33,8 @@ class JetstashConnectTest extends WP_UnitTestCase {
       $this->settings->api_key         = isset($_SERVER['api_key']) ? $_SERVER['api_key'] : null;
       $this->settings->form_id         = isset($_SERVER['form_id']) ? $_SERVER['form_id'] : null;
       $this->settings->user            = isset($_SERVER['user']) ? $_SERVER['user'] : null;
-      $this->settings->success_message = isset($_SERVER['success_message']) ? $_SERVER['success_message'] : null;
-      $this->settings->cache_duration  = isset($_SERVER['cache_duration']) ? $_SERVER['cache_duration'] : null;
+      $this->settings->success_message = isset($_SERVER['success_message']) ? $_SERVER['success_message'] : 'Success message.';
+      $this->settings->cache_duration  = isset($_SERVER['cache_duration']) ? $_SERVER['cache_duration'] : 30;
     } else {
       $envs = array('local', 'staging');
       foreach($envs as $env) {
@@ -53,17 +49,19 @@ class JetstashConnectTest extends WP_UnitTestCase {
         $this->settings->api_key         = isset($config->api_key) ? $config->api_key : null;
         $this->settings->form_id         = isset($config->form_id) ? $config->form_id : null;
         $this->settings->user            = isset($config->user) ? $config->user : null;
-        $this->settings->success_message = isset($config->success_message) ? $config->success_message : null;
-        $this->settings->cache_duration  = isset($config->cache_duration) ? $config->cache_duration : null;
+        $this->settings->success_message = isset($config->success_message) ? $config->success_message : 'Success message.';
+        $this->settings->cache_duration  = isset($config->cache_duration) ? $config->cache_duration : 30;
       } else {
         die('Tests cannot run without config environments');
       }
     }
   }
 
-  private function setApiUrl() {
-    $this->api_url = $this->settings->api_url.'/v1/user/forms?api_key='.$this->settings->api_key.'&user='.$this->settings->user;
-  }
+  /*
+  |--------------------------------------------------------------------------
+  | TESTS
+  |--------------------------------------------------------------------------
+  */
 
   /**
    * Test the updateSettings
@@ -88,11 +86,12 @@ class JetstashConnectTest extends WP_UnitTestCase {
   function testCompatibleVersion()
   {
     $versionBool = JetstashConnect::compatibleVersion();
+
     $this->assertTrue($versionBool);
   }
 
   /**
-   *
+   * Test the building of a form structure
    *
    */
   function testBuildStructure()
@@ -116,6 +115,7 @@ class JetstashConnectTest extends WP_UnitTestCase {
     );
     $response   = json_decode($this->jetstash->submitForm($data));
     $attributes = array('success', 'message', 'data');
+
     $this->assertInternalType('object', $response);
     foreach($attributes as $attr) {
       $this->assertObjectHasAttribute($attr, $response);

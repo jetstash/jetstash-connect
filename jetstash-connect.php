@@ -364,6 +364,7 @@ class JetstashConnect
   {
     if(isset($flags['form']) && $flags['form'] !== null) {
       $structure = $this->retrieveSingleFormFields($flags['form']);
+
       if(isset($structure->data->status_code) && 403 === $structure->data->status_code) {
         $this->invalidateCache($flags['form']);
       } else {
