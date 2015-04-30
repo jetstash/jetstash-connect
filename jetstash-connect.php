@@ -17,7 +17,7 @@ class JetstashConnect
    * @var $version string
    * @var $environment string
    */
-  private $version, $environment;
+  private $version, $environment, $base;
 
   /**
    * Define the public class vars
@@ -38,6 +38,7 @@ class JetstashConnect
     add_action('admin_init', array($this, 'checkVersion'));
     if(!$this->compatibleVersion()) return;
 
+    $this->setBaseDirectory();
     $this->setEnvironment();
     $this->setVersion();
     $this->setSettings();
@@ -117,13 +118,12 @@ class JetstashConnect
    */
   protected function setEnvironment()
   {
-    $base   = plugin_dir_path( __FILE__ );
     $envs   = array('local', 'staging');
     $config = false;
 
     foreach($envs as $env) {
-      if(file_exists($base.'env_'.$env)) {
-        $config            = file_get_contents($base.'env_'.$env);
+      if(file_exists($this->base.'env_'.$env)) {
+        $config            = file_get_contents($this->base.'env_'.$env);
         $config            = json_decode($config);
         $this->environment = $env;
         $this->apiUrl      = $config->api_url;
@@ -135,8 +135,6 @@ class JetstashConnect
       $this->environment = 'production';
       $this->apiUrl      = 'https://api.jetstash.com';
     }
-
-
   }
 
   /**
@@ -207,6 +205,16 @@ class JetstashConnect
   }
 
   /**
+   * Sets the plugin base directory
+   *
+   * @return string
+   */
+  private function setBaseDirectory()
+  {
+    $this->base = plugin_dir_path(__FILE__);
+  }
+
+  /**
    * Load public assets
    *
    * @return void
@@ -214,10 +222,10 @@ class JetstashConnect
   function loadPublicAssets()
   {
     if(!is_admin()) { 
-      wp_enqueue_script('jetstash-connect', plugins_url() . '/jetstash-connect/js/jetstash-ajax.js', array('jquery'), null, true);
+      wp_enqueue_script('jetstash-connect', $this->base.'js/jetstash-ajax.js', array('jquery'), null, true);
     }
     if(isset($this->settings->disable_stylesheet) && true !== $this->settings->disable_stylesheet) {
-      wp_enqueue_style('jetstash-connect-css', plugins_url() . '/jetstash-connect/css/jetstash.css', false, $this->version);
+      wp_enqueue_style('jetstash-connect-css', $this->base.'css/jetstash.css', false, $this->version);
     }
   }
 
@@ -450,7 +458,6 @@ class JetstashConnect
     if($cache === false || $cache->data === null || ($time - $cache->time > $this->settings->cache_duration * 60)) {
       $cache = new StdClass();
       $cache->time = $time;
-      var_dump($endpoint);
       $cache->data = $this->handleGetRequest($endpoint);
       $cache->data = json_decode($cache->data->users_form->form_structure);
 
@@ -491,7 +498,7 @@ class JetstashConnect
   {
     if($fields) {
       $markup  = '<form id="jetstash-connect" role="form" method="post">';
-      $markup .= '<input type="text" class="hidden" name="first_middle_last_name">';
+      $markup .= '<input type="text" class="hidden" name="first_middle_last_name"'.(!isset($this->settings->disable_stylesheet) || !$this->settings->disable_stylesheet ? 'style="display: none;"' : '').'>';
 
       foreach($fields as $field) {
         if($field->type === 'text' || $field->type === 'tel' || $field->type === 'email') {
