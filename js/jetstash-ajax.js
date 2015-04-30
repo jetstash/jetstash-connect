@@ -1,100 +1,137 @@
-jQuery(document).ready(function($) {
-  var $form  = $('#jetstash-connect'),
-      $error = $('#jetstash-error');
+(function($) {
 
-  $form.on('submit',function(e) {
-    var error, data;
+  function Jetstash() {
+    var self = this;
 
-    error = checkFields();
-    data  = $(this).serialize();
+    self.$form   = $('#jetstash-connect');
+    self.$error  = $('#jetstash-error');
+    self.options = jetstashConnect;
+    self.state   = { error: false, message: "All fields completed successfully.", element: null };
 
-    if(error.status !== 'error') {
+    self.submit();
+  }
 
-      $('form#jetstash-connect *').fadeOut(200);
-      $('form#register').prepend('<p class="message">Your form is being processed...</p>');
+  Jetstash.prototype.submit = function() {
+    var self = this;
 
-      $.post(jetstashConnect.ajaxurl, {
-        action : 'jetstash_connect',
-        nonce  : jetstashConnect.nonce,
-        form   : jetstashConnect.form_id,
-        post   : data,
-      },
-      function(response) {
-        successMessage(response);
-      });
+    self.$form.on('submit',function(e) {
+      var data = $(this).serialize();
 
-    } else {
-      errorOutput(error);
-    }
+      e.preventDefault();
+      self.checkRequired();
 
-    return false;
-  });
+      if(self.state.error === false) {
 
-  function checkFields() {
-    var error = {};
+        self.$form.find('button.btn').toggle();
+        self.$error.append('Your form is being submitted...');
 
-    error.status  = 'success';
-    error.message = 'All fields complete';
-
-    clearErrors();
-
-    $('#jetstash-connect *').filter(':input').each(function() {
-      var attr, type, value, field_name;
-
-      attr  = $(this).attr('required');
-      type  = $(this).attr('type');
-      value = $(this).val();
-
-      if(typeof attr !== typeof undefined && attr !== false) {
-        if(value === "") {
-          field_name = $(this).siblings('label').text();
-
-          error.status  = 'error';
-          error.message = field_name + ' is required.';
-          error.element = $(this);
-
-          return false;
-        }
-        if('email' === type && false === looseEmailValidate(value)) {
-          error.status  = 'error';
-          error.message = 'Your email is not valid.';
-          error.element = $(this);
-
-          return false;
-        }
+        $.post(jetstashConnect.ajaxurl, {
+          action : 'jetstash_connect',
+          nonce  : jetstashConnect.nonce,
+          form   : jetstashConnect.form_id,
+          post   : data,
+        },
+        function(response) {
+          self.successOutput(response);
+        });
+      } else {
+        self.errorOutput();
       }
     });
+  };
 
-    return error;
-  }
+  Jetstash.prototype.checkRequired = function() {
+    var self = this;
 
-  function looseEmailValidate(email) {
+    self.clearErrors();
+
+    self.$form.find(':input').each(function() {
+      var el, attr, type, value, field_name;
+
+      el    = $(this);
+      attr  = el.attr('required');
+      type  = el.attr('type');
+      value = el.val();
+
+      if(typeof attr !== typeof undefined && attr !== false) {
+
+        field_name = el.siblings('label').text() || el.closest('label').text().trim() || el.attr('name');
+
+        if(value === "" || value === null) {
+          self.setStateError(field_name + ' is required.',el);
+          return false;
+        }
+
+        if('checkbox' === type && !el.is(':checked')) {
+          self.setStateError(field_name + ' is required.',el);
+          return false;
+        }
+
+        if('radio' === type && !el.is(':checked') && !el.closest('div.form-group').find(':input').is(':checked')) {
+          self.setStateError(field_name + ' is required.', el)
+          return false;
+        }
+  
+        if('email' === type && false === self.validateEmail(value)) {
+          self.setStateError('Your email is not valid.', el)
+          return false;
+        }
+
+      } else {
+        self.state.error   = false;
+        self.state.message = 'All fields complete.';
+        self.state.element = null;
+      }
+    });
+  };
+
+  Jetstash.prototype.validateEmail = function(email) {
     var re = /\S+@\S+\.\S+/;
     return re.test(email);
-  }
+  };
 
-  function clearErrors() {
-    $form.find('div.form-group').removeClass('has-error');
-    $error.empty();
-  }
+  Jetstash.prototype.clearErrors = function() {
+    var self = this;
 
-  function errorOutput(error) {
-    clearErrors();
+    self.$form.find('div.form-group').removeClass('has-error');
+    self.$error.empty();
+  };
 
-    error.element.closest('div.form-group').addClass('has-error');
-    $error.text(error.message);
-  }
+  Jetstash.prototype.setStateError = function(message, el) {
+    var self = this;
 
-  function successMessage(data) {
-    var response = JSON.parse(data);
+    self.state.error   = true;
+    self.state.message = message;
+    self.state.element = el;
+  };
+
+  Jetstash.prototype.errorOutput = function() {
+    var self = this;
+
+    self.clearErrors();
+    console.log(self.state);
+    self.state.element.closest('div.form-group').addClass('has-error');
+    self.$error.text(self.state.message);
+  };
+
+  Jetstash.prototype.successOutput = function(data) {
+    var self = this, response = JSON.parse(data);
+
+    self.clearErrors();
+
+    if(response.success === true) {
+      $('#jetstash-connect *').fadeOut(200);
+      self.$form.prepend('<p class="jetstash-success">' + self.options.message + '</p>');
+    } else {
+      self.$form.find('button.btn').toggle();
+      self.$error.append(response.message);
+    }
+
     if(jetstashConnect.environment === 'local' || jetstashConnect.environment === 'staging') {
       console.log(response);
     }
-    if(response.success) {
-      $form.html('<p class="message">' + jetstashConnect.message + '</p>');
-    } else {
-      $form.html('<p class="message">' + response.message + '</p>');
-    }
-  }
+  };
 
-});
+  new Jetstash();
+
+})(jQuery);
