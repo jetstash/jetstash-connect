@@ -3,7 +3,7 @@
  * Plugin Name: Jetstash Connect
  * Plugin URI: https://www.jetstash.com/connect
  * Description: Dynamically pulls forms from Jetstash and integrates them via a shortcode into the theme.
- * Version: 0.1.0
+ * Version: 1.0.0
  * Author: Jetstash
  * Author URI: https://www.jetstash.com
  */
@@ -502,7 +502,6 @@ class JetstashConnect
           $markup .= $this->compileMarkupTextarea($field);
         } elseif($field->type === 'radio') {
           if(isset($field->values)) {
-            $markup .= $this->compileMarkupLabel($field);
             $markup .= $this->compileMarkupRadio($field, $field->values);
           } else {
             $markup .= $this->compileMarkupError($field->field_name);
@@ -515,7 +514,6 @@ class JetstashConnect
           }
         }
       }
-
       $markup .= '<button type="submit" class="btn btn-default">Submit</button>';
       $markup .= '<p id="jetstash-error"></p>';
       $markup .= '</form>';
@@ -577,10 +575,12 @@ class JetstashConnect
    */
   private function compileMarkupCheckbox($field)
   {
-    $markup  = '<div class="checkbox">';
+    $markup  = '<div class="form-group">';
+    $markup .= '<div class="checkbox">';
     $markup .= '<label for="'.$field->field_name_adj.'">';
-    $markup .= '<input type="checkbox" id="'.$field->field_name_adj.'" name="'.$field->field_name_adj.'"'.(isset($field->is_required) && $field->is_required === 'on' ? ' required' : '').'>'.$field->field_name;
+    $markup .= '<input type="checkbox" id="'.$field->field_name_adj.'" name="'.$field->field_name_adj.'"'.(isset($field->is_required) && $field->is_required === 'on' ? ' required' : '').'> '.$field->field_name;
     $markup .= '</label>';
+    $markup .= '</div>';
     $markup .= '</div>';
 
     return $markup;
@@ -595,13 +595,16 @@ class JetstashConnect
    */
   private function compileMarkupRadio($field, $values)
   {
-    $markup  = '<div class="form-group>';
+    $count = 1;
+    $markup  = '<div class="form-group">';
+    $markup .= '<p class="radio-label">'.$field->field_name.'</p>';
     foreach($values as $value) {
       $markup .= '<div class="radio">';
-      $markup .= '<label>';
-      $markup .= '<input type="radio" name="'.$field->field_name_adj.'" value="'.$value.'"'.(isset($field->is_required) && $field->is_required === 'on' ? ' required' : '').'>'.$value;
+      $markup .= '<label for="'.$field->field_name_adj.'_'.$count.'">';
+      $markup .= '<input type="radio" id="'.$field->field_name_adj.'_'.$count.'"name="'.$field->field_name_adj.'" value="'.$value.'"'.(isset($field->is_required) && $field->is_required === 'on' ? ' required' : '').'>'.$value;
       $markup .= '</label>';
       $markup .= '</div>';
+      $count++;
     }
     $markup .= '</div>';
 
@@ -636,7 +639,7 @@ class JetstashConnect
   {
     $markup  = '<div class="form-group">';
     $markup .= $this->compileMarkupLabel($field);
-    $markup .= '<select id="'.$field->field_name_adj.'" name="'.$field->field_name_adj.'" class="form-control">';
+    $markup .= '<select id="'.$field->field_name_adj.'" name="'.$field->field_name_adj.'" class="form-control"'.(isset($field->is_required) && $field->is_required === 'on' ? ' required' : '').'>';
     foreach($values as $value) {
       $markup .= '<option value="'.$value.'">'.$value.'</option>';
     }
