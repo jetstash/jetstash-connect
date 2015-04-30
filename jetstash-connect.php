@@ -504,10 +504,14 @@ class JetstashConnect
           if(isset($field->values)) {
             $markup .= $this->compileMarkupLabel($field);
             $markup .= $this->compileMarkupRadio($field, $field->values);
+          } else {
+            $markup .= $this->compileMarkupError($field->field_name);
           }
         } elseif($field->type === 'select') {
           if(isset($field->values)) {
             $markup .= $this->compileMarkupSelect($field, $field->values);
+          } else {
+            $markup .= $this->compileMarkupError($field->field_name);
           }
         }
       }
@@ -531,6 +535,19 @@ class JetstashConnect
   private function compileMarkupLabel($field)
   {
     $markup = '<label for="'.$field->field_name_adj.'">'.$field->field_name.'</label>';
+    return $markup;
+  }
+
+  /**
+   * Compile markup error
+   *
+   * @param string
+   *
+   * @return string
+   */
+  private function compileMarkupError($name)
+  {
+    $markup = '<div class="form-group"><p>Error: The field "'.$name.'" is required but has no values set.</p></div>';
     return $markup;
   }
 
