@@ -26,7 +26,8 @@ class JetstashConnectTest extends WP_UnitTestCase {
    * Set our settings variable
    *
    */
-  private function setSettings() {
+  private function setSettings()
+  {
     $this->settings = new StdClass();
     if(isset($_SERVER['environment']) && 'travis' === $_SERVER['environment']) {
       $this->settings->api_url         = isset($_SERVER['api_url']) ? $_SERVER['api_url'] : null;
@@ -36,7 +37,8 @@ class JetstashConnectTest extends WP_UnitTestCase {
       $this->settings->success_message = isset($_SERVER['success_message']) ? $_SERVER['success_message'] : 'Success message.';
       $this->settings->cache_duration  = isset($_SERVER['cache_duration']) ? $_SERVER['cache_duration'] : 30;
     } else {
-      $envs = array('local', 'staging');
+      $envs   = array('local', 'staging');
+      $config = false;
       foreach($envs as $env) {
         if(file_exists(dirname( __FILE__ ).'/../env_'.$env)) {
           $config = file_get_contents(realpath(__DIR__.'/../env_'.$env));
@@ -54,6 +56,39 @@ class JetstashConnectTest extends WP_UnitTestCase {
       } else {
         die('Tests cannot run without config environments');
       }
+    }
+  }
+
+  /**
+   * Set our post, select what type to return
+   *
+   * @param string
+   *
+   * @return array|string
+   */
+  private function setPost($type = 'array')
+  {
+    $postArray = [
+      "first_middle_last_name" => "",
+      "first_name"             => "Jonny",
+      "last_name"              => "Five",
+      "email"                  => "jonnyfive@example.com",
+      "telephone"              => "555-JONN",
+      "comments"               => "My telephone starts with 555, get it?",
+      "contact_me"             => true,
+      "gender"                 => "Robot",
+      "source"                 => "Metal",
+    ];
+
+    if('string' === $type) {
+      $postStringArray = [];
+      foreach($postArray as $key=>$value) {
+        $postStringArray[] = $key."=".$value;
+      }
+      $postString = implode("&", $postStringArray);
+      return $postString;
+    } else {
+      return $postArray;
     }
   }
 
@@ -110,7 +145,7 @@ class JetstashConnectTest extends WP_UnitTestCase {
   {
     $data = array(
       'nonce' => 'fake_nonce',
-      'post'  => 'first_middle_last_name=&first_name=first&last_name=last&email=test@example.com',
+      'post'  => $this->setPost('string'),
       'form'  => $this->settings->form_id,
     );
     $response   = json_decode($this->jetstash->submitForm($data));

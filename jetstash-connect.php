@@ -117,17 +117,26 @@ class JetstashConnect
    */
   protected function setEnvironment()
   {
-    $base = plugin_dir_path( __FILE__ );
-    if(file_exists($base.'env_local')) {
-      $this->environment = 'local';
-      $this->apiUrl      = 'http://api.jetstash.dev'; 
-    } elseif(file_exists($base.'env_staging')) {
-      $this->environment = 'staging';
-      $this->apiUrl      = 'http://qa.api.jetstash.com';
-    } else {
+    $base   = plugin_dir_path( __FILE__ );
+    $envs   = array('local', 'staging');
+    $config = false;
+
+    foreach($envs as $env) {
+      if(file_exists($base.'env_'.$env)) {
+        $config            = file_get_contents($base.'env_'.$env);
+        $config            = json_decode($config);
+        $this->environment = $env;
+        $this->apiUrl      = $config->api_url;
+        break;
+      }
+    }
+
+    if(!$config) {
       $this->environment = 'production';
       $this->apiUrl      = 'https://api.jetstash.com';
     }
+
+
   }
 
   /**
@@ -441,6 +450,7 @@ class JetstashConnect
     if($cache === false || $cache->data === null || ($time - $cache->time > $this->settings->cache_duration * 60)) {
       $cache = new StdClass();
       $cache->time = $time;
+      var_dump($endpoint);
       $cache->data = $this->handleGetRequest($endpoint);
       $cache->data = json_decode($cache->data->users_form->form_structure);
 
@@ -460,7 +470,7 @@ class JetstashConnect
   private function invalidateCache($formId)
   {
     if($settings->invalidateCache) {
-      update_option('jetstash_connect_'.$formId, 'null');
+      delete_option('jetstash_connect_'.$formId);
     }
   }
 
