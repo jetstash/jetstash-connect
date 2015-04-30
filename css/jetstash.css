@@ -1,10 +1,28 @@
-/*
-
-Jetstash.
-
-*/
+/* Jetstash. */
 
 .hidden {
   display: none !important;
   visibility: hidden !important;
+}
+
+#jetstash-connect {
+  width: 100%;
+  height: auto;
+  padding: 15px;
+}
+
+.form-group {
+  overflow: hidden;
+  clear: both;
+  margin: 10px 0px;
+}
+
+.radio-label {
+  margin: 0px;
+}
+
+.radio {
+  float: left;
+  margin-right: 15px;
+  margin-left: 2px;
 }

@@ -17,7 +17,7 @@ class JetstashConnect
    * @var $version string
    * @var $environment string
    */
-  private $version, $environment, $base;
+  private $version, $environment, $baseDir, $baseWeb;
 
   /**
    * Define the public class vars
@@ -38,7 +38,7 @@ class JetstashConnect
     add_action('admin_init', array($this, 'checkVersion'));
     if(!$this->compatibleVersion()) return;
 
-    $this->setBaseDirectory();
+    $this->setBases();
     $this->setEnvironment();
     $this->setVersion();
     $this->setSettings();
@@ -122,8 +122,8 @@ class JetstashConnect
     $config = false;
 
     foreach($envs as $env) {
-      if(file_exists($this->base.'env_'.$env)) {
-        $config            = file_get_contents($this->base.'env_'.$env);
+      if(file_exists($this->baseDir.'env_'.$env)) {
+        $config            = file_get_contents($this->baseDir.'env_'.$env);
         $config            = json_decode($config);
         $this->environment = $env;
         $this->apiUrl      = $config->api_url;
@@ -205,13 +205,14 @@ class JetstashConnect
   }
 
   /**
-   * Sets the plugin base directory
+   * Sets the plugin base directory and base web url
    *
    * @return string
    */
-  private function setBaseDirectory()
+  private function setBases()
   {
-    $this->base = plugin_dir_path(__FILE__);
+    $this->baseDir = plugin_dir_path(__FILE__);
+    $this->baseWeb = plugins_url(null, __FILE__);
   }
 
   /**
@@ -222,10 +223,10 @@ class JetstashConnect
   function loadPublicAssets()
   {
     if(!is_admin()) { 
-      wp_enqueue_script('jetstash-connect', $this->base.'js/jetstash-ajax.js', array('jquery'), null, true);
+      wp_enqueue_script('jetstash-connect', $this->baseWeb.'/js/jetstash-ajax.js', array('jquery'), null, true);
     }
     if(isset($this->settings->disable_stylesheet) && true !== $this->settings->disable_stylesheet) {
-      wp_enqueue_style('jetstash-connect-css', $this->base.'css/jetstash.css', false, $this->version);
+      wp_enqueue_style('jetstash-connect-css', $this->baseWeb.'/css/jetstash.css', false, $this->version);
     }
   }
 
@@ -521,8 +522,8 @@ class JetstashConnect
           }
         }
       }
-      $markup .= '<button type="submit" class="btn btn-default">Submit</button>';
       $markup .= '<p id="jetstash-error"></p>';
+      $markup .= '<button type="submit" class="btn btn-default">Submit</button>';
       $markup .= '</form>';
     } else {
       $markup = '<p>Jetstash Connect Error: Check your settings, no field structure was found.';
@@ -608,7 +609,7 @@ class JetstashConnect
     foreach($values as $value) {
       $markup .= '<div class="radio">';
       $markup .= '<label for="'.$field->field_name_adj.'_'.$count.'">';
-      $markup .= '<input type="radio" id="'.$field->field_name_adj.'_'.$count.'"name="'.$field->field_name_adj.'" value="'.$value.'"'.(isset($field->is_required) && $field->is_required === 'on' ? ' required' : '').'>'.$value;
+      $markup .= '<input type="radio" id="'.$field->field_name_adj.'_'.$count.'"name="'.$field->field_name_adj.'" value="'.$value.'"'.(isset($field->is_required) && $field->is_required === 'on' ? ' required' : '').'> '.$value;
       $markup .= '</label>';
       $markup .= '</div>';
       $count++;
