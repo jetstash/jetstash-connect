@@ -199,7 +199,7 @@ class JetstashConnect
    */
   function loadAdminPanel()
   {
-    add_options_page( 'Jetstash Connect', 'Jetstash Connect', 'administrator', 'jetstash_connect', array(&$this,'loadAdminPanelTemplates'));
+    add_menu_page('Jetstash Connect', 'Jetstash Connect', 'administrator', 'jetstash_connect', array(&$this,'loadAdminPanelTemplates'), 'dashicons-forms', 80);
   }
 
   /**
