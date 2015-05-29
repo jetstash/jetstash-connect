@@ -1,21 +1,27 @@
 <?php
 /**
  * Plugin Name: Jetstash Connect
- * Plugin URI: https://www.jetstash.com/connect
+ * Plugin URI: https://www.jetstash.com/jetstash-connect
  * Description: Dynamically pulls forms from Jetstash and integrates them via a shortcode into the theme.
  * Version: 1.1.0
  * Author: Jetstash
  * Author URI: https://www.jetstash.com
  */
 
+require_once(plugin_dir_path(__FILE__).'inc/JetstashConnectMarkup.php');
+
 class JetstashConnect
 {
+
+  use jetstash;
 
   /**
    * Define the private class vars
    *
    * @var $version string
    * @var $environment string
+   * @var $baseDir string
+   * @var $baseWeb
    */
   private $version, $environment, $baseDir, $baseWeb;
 
@@ -24,6 +30,7 @@ class JetstashConnect
    *
    * @var settings object||false
    * @var $apiUrl string
+   * @var bool
    */
   public $settings, $apiUrl, $test = false;
 
@@ -34,7 +41,7 @@ class JetstashConnect
    */
   function __construct()
   {
-    $this->version     = '0.1.0';
+    $this->version     = '1.1.0';
     add_action('admin_init', array($this, 'checkVersion'));
     if(!$this->compatibleVersion()) return;
 
@@ -79,7 +86,7 @@ class JetstashConnect
    */
   static function compatibleVersion()
   {
-    if(version_compare($GLOBALS['wp_version'], '3.8', '<')) {
+    if(version_compare($GLOBALS['wp_version'], '4.0', '<')) {
       return false;
     }
     return true;
@@ -386,7 +393,7 @@ class JetstashConnect
       if(isset($structure->data->status_code) && 403 === $structure->data->status_code) {
         $this->invalidateCache($flags['form']);
       } else {
-        $structure = $this->compileMarkup($structure->data);
+        $structure = JetstashConnectMarkup::compileMarkup($structure->data);
         $this->loadLocalizedData($flags['form']);
 
         return $structure;
@@ -480,181 +487,6 @@ class JetstashConnect
     if($settings->invalidateCache) {
       delete_option('jetstash_connect_'.$formId);
     }
-  }
-
-  /*
-  |--------------------------------------------------------------------------
-  | Markup
-  |--------------------------------------------------------------------------
-  */
-
-  /**
-   * Compiles our markup to be pushed to the page via the shortcode
-   *
-   * @param array
-   *
-   * @return string
-   */
-  private function compileMarkup($fields)
-  {
-    if($fields) {
-      $markup  = '<form id="jetstash-connect" role="form" method="post">';
-      $markup .= '<input type="text" class="hidden" name="first_middle_last_name"'.(!isset($this->settings->disable_stylesheet) || !$this->settings->disable_stylesheet ? 'style="display: none;"' : '').'>';
-
-      foreach($fields as $field) {
-        if($field->type === 'text' || $field->type === 'tel' || $field->type === 'email') {
-          $markup .= $this->compileMarkupInput($field);
-        } elseif($field->type === 'checkbox') {
-          $markup .= $this->compileMarkupCheckbox($field);
-        } elseif($field->type === 'textarea') {
-          $markup .= $this->compileMarkupTextarea($field);
-        } elseif($field->type === 'radio') {
-          if(isset($field->values)) {
-            $markup .= $this->compileMarkupRadio($field, $field->values);
-          } else {
-            $markup .= $this->compileMarkupError($field->field_name);
-          }
-        } elseif($field->type === 'select') {
-          if(isset($field->values)) {
-            $markup .= $this->compileMarkupSelect($field, $field->values);
-          } else {
-            $markup .= $this->compileMarkupError($field->field_name);
-          }
-        }
-      }
-      $markup .= '<p id="jetstash-error"></p>';
-      $markup .= '<button type="submit" class="btn btn-default">Submit</button>';
-      $markup .= '</form>';
-    } else {
-      $markup = '<p>Jetstash Connect Error: Check your settings, no field structure was found.';
-    }
-    return $markup;
-  }
-
-  /**
-   * Compile the form label
-   *
-   * @param object
-   *
-   * @return string
-   */
-  private function compileMarkupLabel($field)
-  {
-    $markup = '<label for="'.$field->field_name_adj.'">'.$field->field_name.'</label>';
-    return $markup;
-  }
-
-  /**
-   * Compile markup error
-   *
-   * @param string
-   *
-   * @return string
-   */
-  private function compileMarkupError($name)
-  {
-    $markup = '<div class="form-group"><p>Error: The field "'.$name.'" is required but has no values set.</p></div>';
-    return $markup;
-  }
-
-  /**
-   * Compiles the markup for all input field types
-   *
-   * @param object
-   *
-   * @return string
-   */
-  private function compileMarkupInput($field)
-  {
-    $markup  = '<div class="form-group">';
-    $markup .= $this->compileMarkupLabel($field);
-    $markup .= '<input type="'.($field->type).'" class="form-control" id="'.$field->field_name_adj.'" name="'.$field->field_name_adj.'"'.(isset($field->is_required) && $field->is_required === 'on' ? ' required' : '').'>';
-    $markup .= '</div>';
-
-    return $markup;
-  }
-
-  /**
-   * Compiles the markup for all checkbox field types
-   *
-   * @param object
-   *
-   * @return string
-   */
-  private function compileMarkupCheckbox($field)
-  {
-    $markup  = '<div class="form-group">';
-    $markup .= '<div class="checkbox">';
-    $markup .= '<label for="'.$field->field_name_adj.'">';
-    $markup .= '<input type="checkbox" id="'.$field->field_name_adj.'" name="'.$field->field_name_adj.'"'.(isset($field->is_required) && $field->is_required === 'on' ? ' required' : '').'> '.$field->field_name;
-    $markup .= '</label>';
-    $markup .= '</div>';
-    $markup .= '</div>';
-
-    return $markup;
-  }
-
-  /**
-   * Compiles the markup for all radio field types
-   *
-   * @param object, array
-   *
-   * @return string
-   */
-  private function compileMarkupRadio($field, $values)
-  {
-    $count = 1;
-    $markup  = '<div class="form-group">';
-    $markup .= '<p class="radio-label">'.$field->field_name.'</p>';
-    foreach($values as $value) {
-      $markup .= '<div class="radio">';
-      $markup .= '<label for="'.$field->field_name_adj.'_'.$count.'">';
-      $markup .= '<input type="radio" id="'.$field->field_name_adj.'_'.$count.'"name="'.$field->field_name_adj.'" value="'.$value.'"'.(isset($field->is_required) && $field->is_required === 'on' ? ' required' : '').'> '.$value;
-      $markup .= '</label>';
-      $markup .= '</div>';
-      $count++;
-    }
-    $markup .= '</div>';
-
-    return $markup;
-  }
-
-  /**
-   * Compiles the markup for all textarea field types
-   *
-   * @param object
-   *
-   * @return string
-   */
-  private function compileMarkupTextarea($field)
-  {
-    $markup  = '<div class="form-group">';
-    $markup .= $this->compileMarkupLabel($field);
-    $markup .= '<textarea id="'.$field->field_name_adj.'" name="'.$field->field_name_adj.'" class="form-control"'.(isset($field->is_required) && $field->is_required === 'on' ? ' required' : '').'></textarea>';
-    $markup .= '</div>';
-
-    return $markup;
-  }
-
-  /**
-   * Compiles the markup for all select field types
-   *
-   * @param object
-   *
-   * @return string
-   */
-  private function compileMarkupSelect($field, $values)
-  {
-    $markup  = '<div class="form-group">';
-    $markup .= $this->compileMarkupLabel($field);
-    $markup .= '<select id="'.$field->field_name_adj.'" name="'.$field->field_name_adj.'" class="form-control"'.(isset($field->is_required) && $field->is_required === 'on' ? ' required' : '').'>';
-    foreach($values as $value) {
-      $markup .= '<option value="'.$value.'">'.$value.'</option>';
-    }
-    $markup .= '</select>';
-    $markup .= '</div>';
-
-    return $markup;
   }
 
 }
