@@ -1,4 +1,4 @@
-(function($) {
+;(function($) {
 
   function Jetstash() {
     var self = this;

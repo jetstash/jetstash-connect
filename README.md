@@ -4,7 +4,7 @@
 
 ## installation
 
-Install as a WordPress plugin by [downloading](https://github.com/jetstash/jetstash-connect/archive/master.zip) or cloning the project as a submodule. If it is installed as an uploaded zip it currently needs to be renamed to jetstash-connect.php. See issue [#13](https://github.com/jetstash/jetstash-connect/issues/13).
+Install as a WordPress plugin by downloading the latest [release](https://github.com/jetstash/jetstash-connect/releases).
 
 ## usage
 

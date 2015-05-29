@@ -3,7 +3,7 @@
  * Plugin Name: Jetstash Connect
  * Plugin URI: https://www.jetstash.com/connect
  * Description: Dynamically pulls forms from Jetstash and integrates them via a shortcode into the theme.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: Jetstash
  * Author URI: https://www.jetstash.com
  */
