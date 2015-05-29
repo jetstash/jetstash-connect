@@ -1,4 +1,12 @@
-<h2>Jetstash Connect</h2><?php
+<?php
+
+$durations = array(
+  "30"   => "30 Minutes",
+  "60"   => "1 Hour",
+  "360"  => "6 Hours",
+  "720"  => "12 Hours",
+  "1440" => "1 Day"
+);
 
 if(isset($_POST['jetstash_connect']) && $_POST['jetstash_connect'] == 'true') {
   if(1 === check_admin_referer('jetstash-connect')) {
@@ -17,6 +25,10 @@ if(isset($_POST['jetstash_connect']) && $_POST['jetstash_connect'] == 'true') {
 } ?>
 
 <style>
+  img.logo {
+    max-width: 150px;
+    height: auto;
+  }
   input.btn {
     width: auto;
     margin-top: 15px;
@@ -28,6 +40,8 @@ if(isset($_POST['jetstash_connect']) && $_POST['jetstash_connect'] == 'true') {
     resize: none;
   }
 </style>
+
+<h2><img class="logo" src="<?php echo plugins_url(null, __DIR__); ?>/img/jetstash-logo.png" alt="Jetstash Connect"></h2>
 
 <form name="jetstash_connect_settings" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
   <input type="hidden" name="jetstash_connect" value="true">
@@ -48,12 +62,10 @@ if(isset($_POST['jetstash_connect']) && $_POST['jetstash_connect'] == 'true') {
     <tr>
       <th><label for="cache_duration">Cache Duration:</label></th>
       <td>
-        <select id="cache_duration" name="cache_duration">
-          <option value="30"<?php echo isset($settings->cache_duration) && $settings->cache_duration === '30' ? ' selected' : ''; ?>>30 Minutes</option>
-          <option value="60"<?php echo isset($settings->cache_duration) && $settings->cache_duration === '60' ? ' selected' : ''; ?>>1 Hour</option>
-          <option value="360"<?php echo isset($settings->cache_duration) && $settings->cache_duration === '360' ? ' selected' : ''; ?>>6 Hours</option>
-          <option value="720"<?php echo isset($settings->cache_duration) && $settings->cache_duration === '720' ? ' selected' : ''; ?>>12 Hours</option>
-          <option value="1440"<?php echo isset($settings->cache_duration) && $settings->cache_duration === '1440' ? ' selected' : ''; ?>>1 Day</option>
+        <select id="cache_duration" name="cache_duration"><?php
+          foreach($durations as $key=>$value) {
+            echo '<option value="'.$key.'"'.(isset($settings->cache_duration) && $settings->cache_duration === $key ? ' selected' : '').'>'.$value.'</option>';
+          } ?>
         </select>
       </td>
     </tr>

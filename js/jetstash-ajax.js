@@ -1,14 +1,12 @@
 ;(function($) {
 
   function Jetstash() {
-    var self = this;
+    this.$form   = $('#jetstash-connect');
+    this.$error  = $('#jetstash-error');
+    this.options = jetstashConnect;
+    this.state   = { error: false, message: "All fields completed successfully.", element: null };
 
-    self.$form   = $('#jetstash-connect');
-    self.$error  = $('#jetstash-error');
-    self.options = jetstashConnect;
-    self.state   = { error: false, message: "All fields completed successfully.", element: null };
-
-    self.submit();
+    this.submit();
   }
 
   Jetstash.prototype.submit = function() {
@@ -91,40 +89,33 @@
   };
 
   Jetstash.prototype.clearErrors = function() {
-    var self = this;
-
-    self.$form.find('div.form-group').removeClass('has-error');
-    self.$error.empty();
+    this.$form.find('div.form-group').removeClass('has-error');
+    this.$error.empty();
   };
 
   Jetstash.prototype.setStateError = function(message, el) {
-    var self = this;
-
-    self.state.error   = true;
-    self.state.message = message;
-    self.state.element = el;
+    this.state.error   = true;
+    this.state.message = message;
+    this.state.element = el;
   };
 
   Jetstash.prototype.errorOutput = function() {
-    var self = this;
-
-    self.clearErrors();
-    console.log(self.state);
-    self.state.element.closest('div.form-group').addClass('has-error');
-    self.$error.text(self.state.message);
+    this.clearErrors();
+    this.state.element.closest('div.form-group').addClass('has-error');
+    this.$error.text(this.state.message);
   };
 
   Jetstash.prototype.successOutput = function(data) {
-    var self = this, response = JSON.parse(data);
+    var response = JSON.parse(data);
 
-    self.clearErrors();
+    this.clearErrors();
 
     if(response.success === true) {
       $('#jetstash-connect *').fadeOut(200);
-      self.$form.prepend('<p class="jetstash-success">' + self.options.message + '</p>');
+      this.$form.prepend('<p class="jetstash-success">' + this.options.message + '</p>');
     } else {
-      self.$form.find('button.btn').toggle();
-      self.$error.append(response.message);
+      this.$form.find('button.btn').toggle();
+      this.$error.append(response.message);
     }
 
     if(jetstashConnect.environment === 'local' || jetstashConnect.environment === 'staging') {
