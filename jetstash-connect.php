@@ -13,7 +13,7 @@ require_once(plugin_dir_path(__FILE__).'inc/JetstashConnectMarkup.php');
 class JetstashConnect
 {
 
-  use jetstash;
+  // use jetstash;
 
   /**
    * Define the private class vars
@@ -23,7 +23,7 @@ class JetstashConnect
    * @var $baseDir string
    * @var $baseWeb
    */
-  private $version, $environment, $baseDir, $baseWeb;
+  private $version, $environment, $markup, $baseDir, $baseWeb;
 
   /**
    * Define the public class vars
@@ -49,6 +49,7 @@ class JetstashConnect
     $this->setEnvironment();
     $this->setVersion();
     $this->setSettings();
+    $this->markup = new \jetstash\JetstashConnectMarkup();
 
     add_shortcode('jetstash', array(&$this, 'connectShortcode'));
     add_action('admin_menu', array(&$this, 'loadAdminPanel'));
@@ -231,9 +232,11 @@ class JetstashConnect
   {
     if(!is_admin()) { 
       wp_enqueue_script('jetstash-connect', $this->baseWeb.'/js/jetstash-ajax.js', array('jquery'), null, true);
-    }
-    if(isset($this->settings->disable_stylesheet) && true !== $this->settings->disable_stylesheet) {
-      wp_enqueue_style('jetstash-connect-css', $this->baseWeb.'/css/jetstash.css', false, $this->version);
+
+      if(isset($this->settings->disable_stylesheet) && true !== $this->settings->disable_stylesheet) {
+        wp_enqueue_style('jetstash-connect-css', $this->baseWeb.'/css/jetstash.css', false, $this->version);
+      }
+
     }
   }
 
@@ -393,7 +396,7 @@ class JetstashConnect
       if(isset($structure->data->status_code) && 403 === $structure->data->status_code) {
         $this->invalidateCache($flags['form']);
       } else {
-        $structure = JetstashConnectMarkup::compileMarkup($structure->data);
+        $structure = $this->markup->compileMarkup($structure->data);
         $this->loadLocalizedData($flags['form']);
 
         return $structure;
@@ -446,9 +449,9 @@ class JetstashConnect
    */
   protected function retrieveSingleFormFields($formId)
   {
-    $endpoint = $this->urlBuilder('/form/structure', array('form' => $formId));
-    $formStructure = $this->cacheFormStructure($formId, $endpoint);
-    return $formStructure;
+    $endpoint  = $this->urlBuilder('/form/structure', array('form' => $formId));
+    $structure = $this->cacheFormStructure($formId, $endpoint);
+    return $structure;
   }
 
   /**

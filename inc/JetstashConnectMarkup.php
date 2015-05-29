@@ -18,11 +18,11 @@ class JetstashConnectMarkup
    *
    * @return string
    */
-  public static function compileMarkup($fields)
+  public function compileMarkup($fields)
   {
     if($fields) {
       $markup  = '<form id="jetstash-connect" role="form" method="post">';
-      $markup .= '<input type="text" class="hidden" name="first_middle_last_name"'.(!isset($this->settings->disable_stylesheet) || !$this->settings->disable_stylesheet ? 'style="display: none;"' : '').'>';
+      $markup .= '<input type="text" name="first_middle_last_name"'.(!isset($this->settings->disable_stylesheet) || !$this->settings->disable_stylesheet ? 'style="display: none;"' : ' class="hidden"').'>';
 
       foreach($fields as $field) {
         if($field->type === 'text' || $field->type === 'tel' || $field->type === 'email') {
@@ -51,7 +51,8 @@ class JetstashConnectMarkup
     } else {
       $markup = '<p>Jetstash Connect Error: Check your settings, no field structure was found.';
     }
-    return esc_html($markup);
+    return $markup;
+    // return esc_html($markup);
   }
 
   /**
@@ -109,7 +110,7 @@ class JetstashConnectMarkup
     $markup  = '<div class="form-group">';
     $markup .= '<div class="checkbox">';
     $markup .= '<label for="'.$field->field_name_adj.'">';
-    $markup .= '<input type="checkbox" id="'.$field->field_name_adj.'" name="'.$field->field_name_adj.'"'.(isset($field->is_required) && $field->is_required === 'on' ? ' required' : '').'> '.$field->field_name;
+    $markup .= '<input type="checkbox" value="true" id="'.$field->field_name_adj.'" name="'.$field->field_name_adj.'"'.(isset($field->is_required) && $field->is_required === 'on' ? ' required' : '').'> '.$field->field_name;
     $markup .= '</label>';
     $markup .= '</div>';
     $markup .= '</div>';
