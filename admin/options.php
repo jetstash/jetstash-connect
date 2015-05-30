@@ -39,11 +39,14 @@ if(isset($_POST['jetstash_connect']) && $_POST['jetstash_connect'] == 'true') {
   textarea {
     resize: none;
   }
+  .hidden {
+    display: none;
+  }
 </style>
 
 <h2><img class="logo" src="<?php echo plugins_url(null, __DIR__); ?>/img/jetstash-logo.png" alt="Jetstash Connect"></h2>
 
-<form name="jetstash_connect_settings" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
+<form id="jetstash" name="jetstash_connect_settings" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
   <input type="hidden" name="jetstash_connect" value="true">
   <?php wp_nonce_field('jetstash-connect'); ?>
   <table class="form-table">
@@ -75,7 +78,11 @@ if(isset($_POST['jetstash_connect']) && $_POST['jetstash_connect'] == 'true') {
     </tr>
     <tr>
       <th><label for="invalidate_cache">Invalidate Cache:</label></th>
-      <td><input type="checkbox" id="invalidate_cache" name="invalidate_cache"<?php echo isset($settings->invalidate_cache) && $settings->invalidate_cache ? ' checked' : ''; ?>></td>
+      <td><input type="checkbox" id="invalidate_cache" name="invalidate_cache"></td>
+    </tr>
+    <tr id="invalidate" class="hidden">
+      <th><label for="invalidate_form_id">Invalidate Form ID:</label></th>
+      <td><input type="text" id="invalidate_form_id" name="invalidate_form_id"></td>
     </tr>
 
   </table>

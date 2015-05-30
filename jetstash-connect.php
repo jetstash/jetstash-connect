@@ -51,11 +51,15 @@ class JetstashConnect
     $this->setSettings();
     $this->markup = new \jetstash\JetstashConnectMarkup();
 
-    add_shortcode('jetstash', array(&$this, 'connectShortcode'));
-    add_action('admin_menu', array(&$this, 'loadAdminPanel'));
-    add_action('get_header', array(&$this, 'loadPublicAssets'));
-    add_action('wp_ajax_jetstash_connect', array(&$this, 'submitForm'));
-    add_action('wp_ajax_nopriv_jetstash_connect', array(&$this, 'submitForm'));
+    if(is_admin()) {
+      add_action('admin_menu', array(&$this, 'loadAdminPanel'));
+      add_action('admin_enqueue_scripts', array($this, 'loadAdminAssets'));
+    } else {
+      add_shortcode('jetstash', array(&$this, 'connectShortcode'));
+      add_action('get_header', array(&$this, 'loadPublicAssets'));
+      add_action('wp_ajax_jetstash_connect', array(&$this, 'submitForm'));
+      add_action('wp_ajax_nopriv_jetstash_connect', array(&$this, 'submitForm'));
+    }
   }
 
   /*
@@ -230,14 +234,16 @@ class JetstashConnect
    */
   function loadPublicAssets()
   {
-    if(!is_admin()) { 
-      wp_enqueue_script('jetstash-connect', $this->baseWeb.'/js/jetstash-ajax.js', array('jquery'), null, true);
+    wp_enqueue_script('jetstash-connect', $this->baseWeb.'/js/jetstash-ajax.js', array('jquery'), null, true);
 
-      if(isset($this->settings->disable_stylesheet) && true !== $this->settings->disable_stylesheet) {
-        wp_enqueue_style('jetstash-connect-css', $this->baseWeb.'/css/jetstash.css', false, $this->version);
-      }
-
+    if(isset($this->settings->disable_stylesheet) && true !== $this->settings->disable_stylesheet) {
+      wp_enqueue_style('jetstash-connect-css', $this->baseWeb.'/css/jetstash.css', false, $this->version);
     }
+  }
+
+  function loadAdminAssets()
+  {
+    wp_enqueue_script('jetstash-connect-admin', $this->baseWeb.'/js/jetstash-admin.js', array('jquery'), null, true);
   }
 
   /*
@@ -261,9 +267,12 @@ class JetstashConnect
     $settings->success_message    = isset($post['success_message']) ? $post['success_message'] : false;
     $settings->cache_duration     = isset($post['cache_duration']) ? $post['cache_duration'] : false;
     $settings->disable_stylesheet = isset($post['disable_stylesheet']) ? true : false;
-    $settings->invalidate_cache   = isset($post['invalidate_cache']) ? true : false;
     $cerealSettings               = serialize($settings);
     update_option('jetstash_connect_settings', $cerealSettings);
+
+    if(isset($post['invalidate_cache']) && isset($post['invalidate_form_id'])) {
+      self::invalidateCache($post['invalidate_form_id']);
+    }
 
     $settings->error         = false;
     $settings->error_message = false;
@@ -394,7 +403,7 @@ class JetstashConnect
       $structure = $this->retrieveSingleFormFields($flags['form']);
 
       if(isset($structure->data->status_code) && 403 === $structure->data->status_code) {
-        $this->invalidateCache($flags['form']);
+        self::invalidateCache($flags['form']);
       } else {
         $structure = $this->markup->compileMarkup($structure->data);
         $this->loadLocalizedData($flags['form']);
@@ -479,17 +488,15 @@ class JetstashConnect
   }
 
   /**
-   * Invalidate cache on failure
+   * Invalidate form cache
    *
    * @param string
    *
    * @return void
    */
-  private function invalidateCache($formId)
+  private static function invalidateCache($formId)
   {
-    if($settings->invalidateCache) {
-      delete_option('jetstash_connect_'.$formId);
-    }
+    delete_option('jetstash_connect_'.$formId);
   }
 
 }
