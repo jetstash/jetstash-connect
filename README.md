@@ -39,6 +39,16 @@ The ability to run unit tests if updating the plugin has some requirements and c
  - PHPUnit  
  - Clean WordPress install (with fresh database)  
  - WP-CLI  
+ - Node.js  
+
+### build
+
+Currently the build system only concats && minifies the javascript into an admin and app version.
+
+```
+npm install
+gulp
+```
 
 ### running tests
 
