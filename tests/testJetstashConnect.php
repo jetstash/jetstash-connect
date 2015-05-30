@@ -107,7 +107,7 @@ class JetstashConnectTest extends WP_UnitTestCase {
     $settings = JetstashConnect::updateSettings((array) $this->settings);
 
     // Assert our object has the expected attributes
-    $attributes = array('api_key', 'user', 'success_message', 'cache_duration', 'disable_stylesheet', 'invalidate_cache', 'error', 'error_message');
+    $attributes = array('api_key', 'user', 'success_message', 'cache_duration', 'disable_stylesheet', 'error', 'error_message');
     $this->assertInternalType('object', $settings);
     foreach($attributes as $attr) {
       $this->assertObjectHasAttribute($attr, $settings);
