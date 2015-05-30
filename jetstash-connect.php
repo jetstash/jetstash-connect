@@ -234,7 +234,7 @@ class JetstashConnect
    */
   function loadPublicAssets()
   {
-    wp_enqueue_script('jetstash-connect', $this->baseWeb.'/js/jetstash-ajax.js', array('jquery'), null, true);
+    wp_enqueue_script('jetstash-connect', $this->baseWeb.'/js/jetstash-app.js', array('jquery'), null, true);
 
     if(isset($this->settings->disable_stylesheet) && true !== $this->settings->disable_stylesheet) {
       wp_enqueue_style('jetstash-connect-css', $this->baseWeb.'/css/jetstash.css', false, $this->version);

@@ -1,7 +1,1 @@
-;(function($) {
-
-  $('form#jetstash').on('change', 'input#invalidate_cache', function() {
-    $('tr#invalidate').toggleClass('hidden');
-  });
-
-})(jQuery);
+!function(n){n("form#jetstash").on("change","input#invalidate_cache",function(){n("tr#invalidate").toggleClass("hidden")})}(jQuery);

@@ -1,3 +1,4 @@
 env_local
 env_staging
+node_modules
 vendor
