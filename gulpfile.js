@@ -1,7 +1,8 @@
-var gulp   = require('gulp');
-var concat = require('gulp-concat');
-var uglify = require('gulp-uglify');
-var notify = require('gulp-notify');
+var gulp        = require('gulp');
+var concat      = require('gulp-concat');
+var uglify      = require('gulp-uglify');
+var notify      = require('gulp-notify');
+var browserSync = require('browser-sync').create();
 
 gulp.task('admin', function() {
   return gulp.src('js/admin/*.js')

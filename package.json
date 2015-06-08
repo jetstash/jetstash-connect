@@ -1,20 +1,17 @@
 {
   "name": "jetstash-connect",
   "version": "1.1.0",
-  "description": "A WordPress plugin for connecting to Jetstash",
+  "description": "A WordPress plugin for connecting and displaying Jetstash forms.",
   "main": "gulpfile.js",
   "directories": {
     "test": "tests"
   },
-  "dependencies": {
-    "gulp": "^3.8.11",
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "browser-sync": "^2.7.6",
     "gulp-concat": "^2.5.2",
     "gulp-notify": "^2.2.0",
     "gulp-uglify": "^1.2.0"
-  },
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
