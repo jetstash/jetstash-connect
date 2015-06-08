@@ -52,7 +52,6 @@ class JetstashConnectMarkup
       $markup = '<p>Jetstash Connect Error: Check your settings, no field structure was found.';
     }
     return $markup;
-    // return esc_html($markup);
   }
 
   /**
