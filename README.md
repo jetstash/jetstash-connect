@@ -68,4 +68,4 @@ This plugin is a complimentary product offered to simplfy getting up and running
 
 ## license
 
-MIT
+GPLv3
