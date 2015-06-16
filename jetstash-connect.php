@@ -54,12 +54,12 @@ class JetstashConnect
     if(is_admin()) {
       add_action('admin_menu', array(&$this, 'loadAdminPanel'));
       add_action('admin_enqueue_scripts', array($this, 'loadAdminAssets'));
-    } else {
-      add_shortcode('jetstash', array(&$this, 'connectShortcode'));
-      add_action('get_header', array(&$this, 'loadPublicAssets'));
-      add_action('wp_ajax_jetstash_connect', array(&$this, 'submitForm'));
-      add_action('wp_ajax_nopriv_jetstash_connect', array(&$this, 'submitForm'));
     }
+
+    add_shortcode('jetstash', array(&$this, 'connectShortcode'));
+    add_action('get_header', array(&$this, 'loadPublicAssets'));
+    add_action('wp_ajax_jetstash_connect', array(&$this, 'submitForm'));
+    add_action('wp_ajax_nopriv_jetstash_connect', array(&$this, 'submitForm'));
   }
 
   /*
