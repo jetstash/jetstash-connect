@@ -30,7 +30,7 @@ Bugs, pull requests, features, etc. are all handled and maintained on GitHub.
 
 ## testing
 
-The ability to run unit tests if updating the plugin has some requirements and caveats. To run the test successfully we need to shoe horn it into
+The ability to run unit tests if updating the plugin has some requirements and caveats. To run the test successfully we need to shoe horn it into a working version of WordPress.
 
 ### requirements
 
