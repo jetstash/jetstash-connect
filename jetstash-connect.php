@@ -18,10 +18,12 @@ class JetstashConnect
    *
    * @var $version string
    * @var $environment string
+   * @var $markup string
+   * @var $message object
    * @var $baseDir string
    * @var $baseWeb
    */
-  private $version, $environment, $markup, $baseDir, $baseWeb;
+  private $version, $environment, $markup, $message, $baseDir, $baseWeb;
 
   /**
    * Define the public class vars
@@ -40,6 +42,7 @@ class JetstashConnect
   function __construct()
   {
     $this->version = "1.2.0";
+    $this->setMessages();
 
     add_action('admin_init', array($this, 'checkVersion'));
     if(!$this->compatibleVersion()) return;
@@ -68,6 +71,22 @@ class JetstashConnect
   */
 
   /**
+   * Sets the plugin state messages on construct
+   *
+   * @return void
+   */
+  private function setMessages()
+  {
+    $this->message = (object) array(
+      "nonce"                => "Session expired, please refresh and try again.",
+      "empty"                => "No post was made, please refresh and try again.",
+      "recaptcha_failed"     => "Recaptcha failed, please refresh the page and try again.",
+      "recaptcha_incomplete" => "Google Recaptcha is required to submit this form.",
+      "outdated_version"     => "Jetstash Connect requires one of the latest 3 versions of WordPress.",
+    );
+  }
+
+  /**
    * Check the WordPress version against what the plugin supports
    *
    * @return void
@@ -90,10 +109,7 @@ class JetstashConnect
    */
   static function compatibleVersion()
   {
-    if(version_compare($GLOBALS['wp_version'], '4.0', '<')) {
-      return false;
-    }
-    return true;
+    return version_compare($GLOBALS['wp_version'], '4.0', '<') ? false : true;
   }
 
   /**
@@ -105,7 +121,7 @@ class JetstashConnect
   {
     if(!self::compatibleVersion()) {
       deactivate_plugins(plugin_basename(__FILE__));
-      wp_die(__('Jetstash Connect requires one of the latest 3 versions of WordPress.', 'JetstashConnect'));
+      wp_die(__($this->message->outdated_version, 'JetstashConnect'));
     }
   }
 
@@ -173,7 +189,8 @@ class JetstashConnect
   public function connectShortcode($atts)
   {
     $flags = shortcode_atts(array(
-      'form' => null,
+      'form'      => null,
+      'recaptcha' => null,
     ), $atts);
 
     return $this->buildStructure($flags);
@@ -192,7 +209,7 @@ class JetstashConnect
    */
   function pluginDisabled()
   {
-    echo '<strong>'.esc_html__('Jetstash Connect requires one of the latest 3 versions of WordPress.', 'JetstashConnect').'</strong>';
+    echo '<strong>'.esc_html__($this->message->outdated_version, 'JetstashConnect').'</strong>';
   }
 
   /**
@@ -271,16 +288,14 @@ class JetstashConnect
   public static function updateSettings($post)
   {
     $settings = new StdClass();
-    $settings->api_key            = isset($post['api_key']) ? $post['api_key'] : false;
-    $settings->user               = isset($post['user']) ? $post['user'] : false;
-    $settings->success_message    = isset($post['success_message']) ? $post['success_message'] : false;
-    $settings->cache_duration     = isset($post['cache_duration']) ? $post['cache_duration'] : false;
-    $settings->disable_stylesheet = isset($post['disable_stylesheet']) ? true : false;
-    if(isset($post['enable_recaptcha'])) {
-      $settings->enable_recaptcha     = true;
-      $settings->recaptcha_site_key   = isset($post['recaptcha_site_key']) ? $post['recaptcha_site_key'] : '';
-      $settings->recaptcha_secret_key = isset($post['recaptcha_secret_key']) ? $post['recaptcha_secret_key'] : '';
-    }
+    $settings->api_key              = isset($post['api_key']) ? $post['api_key'] : false;
+    $settings->user                 = isset($post['user']) ? $post['user'] : false;
+    $settings->success_message      = isset($post['success_message']) ? $post['success_message'] : false;
+    $settings->cache_duration       = isset($post['cache_duration']) ? $post['cache_duration'] : false;
+    $settings->disable_stylesheet   = isset($post['disable_stylesheet']) ? true : false;
+    $settings->enable_recaptcha     = isset($post['enable_recaptcha']) ? true : false;
+    $settings->recaptcha_site_key   = isset($post['recaptcha_site_key']) ? $post['recaptcha_site_key'] : '';
+    $settings->recaptcha_secret_key = isset($post['recaptcha_secret_key']) ? $post['recaptcha_secret_key'] : '';
 
     $cerealSettings               = serialize($settings);
     update_option('jetstash_connect_settings', $cerealSettings);
@@ -340,12 +355,12 @@ class JetstashConnect
 
     // Validate our nonce and also our hidden spam field
     if(wp_verify_nonce($nonce, 'jetstash-connect') === false && !$this->test) {
-      return $this->ajaxResponse(false, 'Session expired, please refresh and try again.', $data);
+      return $this->ajaxResponse(false, $this->message->nonce, $data);
     }
 
     // Validate our hidden field to alleviate spam
     if((!isset($data) || empty($data)) || (isset($data['first_middle_last_name']) && $data['first_middle_last_name'] !== "")) {
-      return $this->ajaxResponse(false, 'No post was made, please refresh and try again.', $data);
+      return $this->ajaxResponse(false, $this->message->empty, $data);
     }
 
     // Validate recaptcha if it is set by the user
@@ -353,10 +368,10 @@ class JetstashConnect
       if(isset($data['g-recaptcha-response'])) {
         $recaptcha = $this->handleRecaptchaPostRequest($data['g-recaptcha-response']);
         if(!$recaptcha->success) {
-          return $this->ajaxResponse(false, 'Recaptcha failed, please refresh the page and try again.');
+          return $this->ajaxResponse(false, $this->message->recaptcha_failed);
         }
       } else {
-        return $this->ajaxResponse(false, 'Google Recaptcha is required to submit this form.');
+        return $this->ajaxResponse(false, $this->message->recaptcha_incomplete);
       }
     }
 
