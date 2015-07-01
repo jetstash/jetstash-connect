@@ -6,29 +6,33 @@
   padding: 15px;
 }
 
-.hidden {
+#jetstash-connect .hidden {
   display: none !important;
   visibility: hidden !important;
 }
 
-.form-group {
+#jetstash-connect .form-group {
   overflow: hidden;
   clear: both;
   margin: 10px 0px;
 }
 
-.radio-label {
+#jetstash-connect .radio-label {
   margin: 0px;
 }
 
-.radio {
+#jetstash-connect .radio {
   float: left;
   margin-right: 15px;
   margin-left: 2px;
 }
 
-.has-error {
+#jetstash-connect .has-error label {
   color: #a94442;
-  background-color: #f2dede;
+}
+
+#jetstash-connect .has-error input,
+#jetstash-connect .has-error textarea {
   border-color: #ebccd1;
+  background-color: #f2dede;
 }

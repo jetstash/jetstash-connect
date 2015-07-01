@@ -10,7 +10,8 @@
   margin-top: 15px;
 }
 
-#jetstash-settings select, input, textarea {
+#jetstash-settings select, #jetstash-settings input,
+#jetstash-settings textarea {
   width: 350px;
 }
 
