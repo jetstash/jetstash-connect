@@ -24,26 +24,6 @@ if(isset($_POST['jetstash_connect']) && $_POST['jetstash_connect'] == 'true') {
   $settings = unserialize(get_option('jetstash_connect_settings'));
 } ?>
 
-<style>
-  img.logo {
-    max-width: 150px;
-    height: auto;
-  }
-  input.btn {
-    width: auto;
-    margin-top: 15px;
-  }
-  select, input, textarea {
-    width: 350px;
-  }
-  textarea {
-    resize: none;
-  }
-  .hidden {
-    display: none;
-  }
-</style>
-
 <h2><img class="logo" src="<?php echo plugins_url(null, __DIR__); ?>/img/jetstash-logo.png" alt="Jetstash Connect"></h2>
 
 <form id="jetstash" name="jetstash_connect_settings" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">

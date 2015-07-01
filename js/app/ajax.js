@@ -56,12 +56,12 @@
         field_name = el.siblings('label').text() || el.closest('label').text().trim() || el.attr('name');
 
         if(value === "" || value === null) {
-          self.setStateError(field_name + ' is required.',el);
+          self.setStateError(field_name + ' is required.', el);
           return false;
         }
 
         if('checkbox' === type && !el.is(':checked')) {
-          self.setStateError(field_name + ' is required.',el);
+          self.setStateError(field_name + ' is required.', el);
           return false;
         }
 
@@ -123,6 +123,9 @@
     }
   };
 
-  new Jetstash();
+  // Load the Jetstash class
+  if($('form#jetstash-connect').length > 0) {
+    new Jetstash();
+  }
 
 })(jQuery);

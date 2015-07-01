@@ -13,8 +13,6 @@ require_once(plugin_dir_path(__FILE__).'inc/JetstashConnectMarkup.php');
 class JetstashConnect
 {
 
-  // use jetstash;
-
   /**
    * Define the private class vars
    *
@@ -41,7 +39,8 @@ class JetstashConnect
    */
   function __construct()
   {
-    $this->version     = '1.2.0';
+    $this->version = "1.2.0";
+
     add_action('admin_init', array($this, 'checkVersion'));
     if(!$this->compatibleVersion()) return;
 
@@ -237,7 +236,7 @@ class JetstashConnect
     wp_enqueue_script('jetstash-connect', $this->baseWeb.'/js/jetstash-app.js', array('jquery'), null, true);
 
     if(isset($this->settings->disable_stylesheet) && true !== $this->settings->disable_stylesheet) {
-      wp_enqueue_style('jetstash-connect-css', $this->baseWeb.'/css/jetstash.css', false, $this->version);
+      wp_enqueue_style('jetstash-connect-css', $this->baseWeb.'/css/jetstash-app.css', false, $this->version);
     }
 
     if(isset($this->settings->enable_recaptcha) && $this->settings->enable_recaptcha) {
@@ -245,9 +244,15 @@ class JetstashConnect
     }
   }
 
+  /**
+   * Loads assets into the admin
+   *
+   * @return void
+   */
   function loadAdminAssets()
   {
-    wp_enqueue_script('jetstash-connect-admin', $this->baseWeb.'/js/jetstash-admin.js', array('jquery'), null, true);
+    wp_enqueue_script('jetstash-connect-admin-js', $this->baseWeb.'/js/jetstash-admin.js', array('jquery'), null, true);
+    wp_enqueue_style('jetstash-connect-admin-css', $this->baseWeb.'/css/jetstash-admin.css', false, $this->version);
   }
 
   /*
