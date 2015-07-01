@@ -1,23 +1,23 @@
 /* Jetstash. */
 
-img.logo {
+#jetstash img.logo {
   max-width: 150px;
   height: auto;
 }
 
-input.btn {
+#jetstash input.btn {
   width: auto;
   margin-top: 15px;
 }
 
-select, input, textarea {
+#jetstash select, input, textarea {
   width: 350px;
 }
 
-textarea {
+#jetstash textarea {
   resize: none;
 }
 
-.hidden {
+#jetstash .hidden {
   display: none;
 }

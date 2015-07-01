@@ -1,14 +1,14 @@
 /* Jetstash. */
 
-.hidden {
-  display: none !important;
-  visibility: hidden !important;
-}
-
 #jetstash-connect {
   width: 100%;
   height: auto;
   padding: 15px;
+}
+
+.hidden {
+  display: none !important;
+  visibility: hidden !important;
 }
 
 .form-group {
