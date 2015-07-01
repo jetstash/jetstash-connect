@@ -84,7 +84,18 @@ if(isset($_POST['jetstash_connect']) && $_POST['jetstash_connect'] == 'true') {
       <th><label for="invalidate_form_id">Invalidate Form ID:</label></th>
       <td><input type="text" id="invalidate_form_id" name="invalidate_form_id"></td>
     </tr>
-
+    <tr>
+      <th><label for="enable_recaptcha">Enable Google Recaptcha:</label></th>
+      <td><input type="checkbox" id="enable_recaptcha" name="enable_recaptcha" value="1"<?php echo isset($settings->enable_recaptcha) ? ' checked' : ''; ?>></td>
+    </tr>
+    <tr id="site-key" class="<?php echo !isset($settings->enable_recaptcha) ? 'hidden' : ''; ?>">
+      <th><label for="recaptcha_site_key">Recaptcha Site Key:</label></th>
+      <td><input type="text" id="recaptcha_site_key" name="recaptcha_site_key" value="<?php echo isset($settings->recaptcha_site_key) ? $settings->recaptcha_site_key : ''; ?>"></td>
+    </tr>
+    <tr id="secret-key" class="<?php echo !isset($settings->enable_recaptcha) ? 'hidden' : ''; ?>">
+      <th><label for="recaptcha_secret_key">Recaptcha Secret Key:</label></th>
+      <td><input type="text" id="recaptcha_secret_key" name="recaptcha_secret_key" value="<?php echo isset($settings->recaptcha_secret_key) ? $settings->recaptcha_secret_key : ''; ?>"></td>
+    </tr>
   </table>
   <input class="btn button" type="submit" name="Submit" value="Update Settings" />
 </form>

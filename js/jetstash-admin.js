@@ -1,1 +1,1 @@
-!function(n){n("form#jetstash").on("change","input#invalidate_cache",function(){n("tr#invalidate").toggleClass("hidden")})}(jQuery);
+!function(e){var n=e("form#jetstash");n.on("change","input#invalidate_cache",function(){e("tr#invalidate").toggleClass("hidden")}),n.on("change","input#enable_recaptcha",function(){e("tr#site-key").toggleClass("hidden"),e("tr#secret-key").toggleClass("hidden")})}(jQuery);

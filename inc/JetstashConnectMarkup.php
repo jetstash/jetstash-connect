@@ -12,6 +12,31 @@ class JetstashConnectMarkup
   */
 
   /**
+   * Private class vars
+   *
+   * @var $settings object
+   */
+  private $settings;
+
+  /**
+   * Class constructor
+   */
+  function __construct()
+  {
+    $this->loadSettings();
+  }
+
+  /**
+   * Loads the settings to trigger optional includes
+   *
+   * @return void
+   */
+  private function loadSettings()
+  {
+    $this->settings = unserialize(get_option('jetstash_connect_settings'));
+  }
+
+  /**
    * Compiles our markup to be pushed to the page via the shortcode
    *
    * @param array
@@ -44,6 +69,9 @@ class JetstashConnectMarkup
             $markup .= $this->compileMarkupError($field->field_name);
           }
         }
+      }
+      if(isset($this->settings->enable_recaptcha) && $this->settings->enable_recaptcha) {
+        $markup .= '<div class="g-recaptcha" data-sitekey="'.$this->settings->recaptcha_site_key.'"></div>';
       }
       $markup .= '<p id="jetstash-error"></p>';
       $markup .= '<button type="submit" class="btn btn-default">Submit</button>';
