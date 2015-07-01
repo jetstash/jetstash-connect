@@ -22,6 +22,14 @@ In a template/theme:
 <?php do_shortcode('[jetstash form="YOUR_FORM_ID"]'); ?>
 ```
 
+After a successful ajax submission you can listen for a custom event `jetstash` to hook in custom code. The state attribute contains the submission data and the response data from the application.
+
+```
+$(window).on("jetstash", function(e) {
+  console.log(e.state);
+});
+```
+
 ## issues
 
 Bugs, pull requests, features, etc. are all handled and maintained on GitHub.

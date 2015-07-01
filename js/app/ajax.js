@@ -38,7 +38,9 @@
           post   : data,
         },
         function(response) {
+          response = JSON.parse(response);
           self.successOutput(response);
+          self.loadCustomEvent("jetstash", response);
         });
       } else {
         self.errorOutput();
@@ -144,9 +146,7 @@
    *
    * @param string
    */
-  Jetstash.prototype.successOutput = function(data) {
-    var response = JSON.parse(data);
-
+  Jetstash.prototype.successOutput = function(response) {
     this.clearErrors();
 
     if(response.success === true) {
@@ -160,6 +160,15 @@
     if(jetstashConnect.environment === 'local' || jetstashConnect.environment === 'staging') {
       console.log(response);
     }
+  };
+
+  /**
+   * Loads custom events
+   *
+   * @param string, object
+   */
+  Jetstash.prototype.loadCustomEvent = function(name, param) {
+    $.event.trigger({ type: name, 'state': param });
   };
 
   // Load the Jetstash class if exists
