@@ -15,6 +15,11 @@
   width: 350px;
 }
 
+#jetstash-settings input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
+
 #jetstash-settings textarea {
   resize: none;
 }
