@@ -219,7 +219,7 @@ class JetstashConnect
    */
   function loadAdminPanel()
   {
-    add_menu_page('Jetstash Connect', 'Jetstash Connect', 'administrator', 'jetstash_connect', array(&$this,'loadAdminPanelTemplates'), 'dashicons-forms', 80);
+    add_menu_page('Jetstash Connect', 'Jetstash Connect', 'administrator', 'jetstash_connect', array(&$this,'loadAdminPanelTemplates'), 'dashicons-forms', 86.75309);
   }
 
   /**
@@ -495,7 +495,7 @@ class JetstashConnect
   */
 
   /**
-   * Build the structure 
+   * Build the structure
    *
    */
   public function buildStructure($flags)
@@ -542,7 +542,7 @@ class JetstashConnect
   {
     $curl = curl_init();
     curl_setopt($curl, CURLOPT_URL, $endpoint);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1); 
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
     $data = curl_exec($curl);
     curl_close($curl);
@@ -555,7 +555,7 @@ class JetstashConnect
    *
    * @param string
    *
-   * @return 
+   * @return
    */
   protected function retrieveSingleFormFields($formId)
   {
