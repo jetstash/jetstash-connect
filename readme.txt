@@ -2,8 +2,8 @@
 Contributors: jetstash
 Tags: jetstash, ajax, contact, contact form, email, feedback, form building, forms
 Requires at least: 4.0
-Tested up to: 4.2.4
-Stable tag: 1.3.2
+Tested up to: 4.4
+Stable tag: 1.3.3
 License: GPLv3
 License URI: https://github.com/jetstash/jetstash-connect/blob/master/LICENSE
 
@@ -23,9 +23,13 @@ This plugin is built to help you easily embed your Jetstash form into your WordP
 
 == Frequently Asked Questions ==
 
-See either the [Jetstash Docs](https://docs.jetstash.com) or [support](https://app.jetstash.com/support).
+See the FAQs on [support](https://app.jetstash.com/support).
 
 == Changelog ==
+
+= 1.3.2 =
+- updated branding, logos, colors
+- merge latests test checkout
 
 = 1.3.1 =
 - tagged versions correctly throughout plugin
