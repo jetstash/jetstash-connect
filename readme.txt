@@ -3,7 +3,7 @@ Contributors: jetstash
 Tags: jetstash, ajax, contact, contact form, email, feedback, form building, forms
 Requires at least: 4.0
 Tested up to: 4.4
-Stable tag: 1.3.3
+Stable tag: 1.3.4
 License: GPLv3
 License URI: https://github.com/jetstash/jetstash-connect/blob/master/LICENSE
 
@@ -27,9 +27,16 @@ See the FAQs on [support](https://app.jetstash.com/support).
 
 == Changelog ==
 
-= 1.3.2 =
+= 1.3.4 =
+- didn't properly checkut out v1.3.4 in plugin file  
+- updated tests to use newer editions of WP  
+
+= 1.3.3 =
 - updated branding, logos, colors
 - merge latests test checkout
+
+= 1.3.2 =
+- fixed jetstash menu overriding settings
 
 = 1.3.1 =
 - tagged versions correctly throughout plugin
